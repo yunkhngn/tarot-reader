@@ -7,32 +7,32 @@ export default function AppNavbar() {
 
   return (
     <Navbar 
-      className="backdrop-blur-md bg-white/10 border-b border-white/20"
+      className="bg-[#1a1a1a] border-b border-gray-800"
       maxWidth="full"
       isBordered
     >
       <NavbarBrand>
-        <Link href="/" className="font-bold text-white text-xl hover:opacity-80 transition-opacity">
-          🔮 Tarot Reader
+        <Link href="/" className="font-bold text-white text-xl hover:opacity-80 transition-opacity flex items-center gap-2">
+          <span>⭐</span> TAROT READER
         </Link>
       </NavbarBrand>
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+      <NavbarContent className="hidden sm:flex gap-6" justify="center">
         <NavbarItem isActive={router.pathname === '/reading'}>
           <HeroUILink 
             as={Link}
             href="/reading"
-            className={router.pathname === '/reading' ? 'text-white font-semibold' : 'text-white/80'}
+            className={router.pathname === '/reading' ? 'text-white font-semibold' : 'text-white/70 hover:text-white'}
           >
-            Bói Tarot
+            <span className="mr-1">+</span> BÓI BÀI TAROT
           </HeroUILink>
         </NavbarItem>
         <NavbarItem isActive={router.pathname === '/library'}>
           <HeroUILink 
             as={Link}
             href="/library"
-            className={router.pathname === '/library' ? 'text-white font-semibold' : 'text-white/80'}
+            className={router.pathname === '/library' ? 'text-white font-semibold' : 'text-white/70 hover:text-white'}
           >
-            Library Bài
+            <span className="mr-1">+</span> BÀI TAROT
           </HeroUILink>
         </NavbarItem>
       </NavbarContent>
