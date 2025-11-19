@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const path = require("path");
 const cardRoutes = require("./routes/cardRoutes"); // Import modular route handlers
 const errorHandler = require("./middlewares/errorHandler"); // Import error handling middleware
 
@@ -9,7 +10,8 @@ const port = process.env.PORT || 3000; // Use a default port if PORT environment
 
 app.use(express.json());
 
-app.use("/tarotdeck", express.static("images"));
+// Serve static images
+app.use("/tarotdeck", express.static(path.join(__dirname, "images")));
 
 // Mount the cardRoutes router
 app.use("/cards", cardRoutes);
