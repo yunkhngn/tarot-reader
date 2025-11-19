@@ -7,6 +7,7 @@ import {
   Spinner
 } from '@heroui/react';
 import AppNavbar from '../components/Navbar';
+import Metadata from '../components/Metadata';
 
 const suggestedQuestions = [
   "Mối quan hệ tiếp theo của tôi có khả năng kéo dài không?",
@@ -39,6 +40,9 @@ export default function Reading() {
     try {
       // Get 3 random cards
       const cardsResponse = await fetch('/api/cards/threecards');
+      if (!cardsResponse.ok) {
+        throw new Error('Không thể lấy các lá bài');
+      }
       const threeCards = await cardsResponse.json();
       setCards(threeCards);
 
@@ -53,6 +57,27 @@ export default function Reading() {
           cards: threeCards,
         }),
       });
+
+      if (!analysisResponse.ok) {
+        const errorText = await analysisResponse.text();
+        let errorMessage = 'Không thể phân tích bài';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.details || errorData.error || errorMessage;
+          if (errorData.type) {
+            errorMessage += ` (${errorData.type})`;
+          }
+        } catch (e) {
+          errorMessage = `Lỗi ${analysisResponse.status}: ${errorText.substring(0, 100)}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const contentType = analysisResponse.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await analysisResponse.text();
+        throw new Error('Server trả về dữ liệu không hợp lệ');
+      }
 
       const data = await analysisResponse.json();
       if (data.error) {
@@ -72,8 +97,14 @@ export default function Reading() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a]">
-      <AppNavbar />
+    <>
+      <Metadata 
+        title="Bói Tarot - Đặt Câu Hỏi Cho Trải Bài Tarot"
+        description="Đặt câu hỏi và nhận phân tích chi tiết từ các lá bài Tarot. Khám phá quá khứ, hiện tại và tương lai của bạn."
+        image="/tarot.jpeg"
+      />
+      <div className="min-h-screen bg-[#1a1a1a]">
+        <AppNavbar />
       
       <div className="container mx-auto px-4 py-12 max-w-5xl">
         {/* Main Title */}
@@ -182,7 +213,7 @@ export default function Reading() {
         {analysis && (
           <div className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-8 mb-8">
             <h2 className="text-3xl font-serif text-[#D4AF37] mb-6">
-              ✨ Phân Tích Tarot
+              Phân Tích Tarot
             </h2>
             <div 
               className="text-white/90 leading-relaxed whitespace-pre-line"
@@ -196,7 +227,8 @@ export default function Reading() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -12,8 +12,8 @@ export default function AppNavbar() {
       isBordered
     >
       <NavbarBrand>
-        <Link href="/" className="font-bold text-white text-xl hover:opacity-80 transition-opacity flex items-center gap-2">
-          <span>⭐</span> TAROT READER
+        <Link href="/" className="font-bold text-white text-xl hover:opacity-80 transition-opacity">
+          TAROT READER
         </Link>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-6" justify="center">
@@ -23,7 +23,7 @@ export default function AppNavbar() {
             href="/reading"
             className={router.pathname === '/reading' ? 'text-white font-semibold' : 'text-white/70 hover:text-white'}
           >
-            <span className="mr-1">+</span> BÓI BÀI TAROT
+            BÓI BÀI TAROT
           </HeroUILink>
         </NavbarItem>
         <NavbarItem isActive={router.pathname === '/library'}>
@@ -32,7 +32,7 @@ export default function AppNavbar() {
             href="/library"
             className={router.pathname === '/library' ? 'text-white font-semibold' : 'text-white/70 hover:text-white'}
           >
-            <span className="mr-1">+</span> BÀI TAROT
+            BÀI TAROT
           </HeroUILink>
         </NavbarItem>
       </NavbarContent>

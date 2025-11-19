@@ -119,6 +119,11 @@
   dependencies:
     tslib "^2.8.0"
 
+"@google/generative-ai@^0.24.1":
+  version "0.24.1"
+  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.24.1.tgz#634a3c06f8ea7a6125c1b0d6c1e66bb11afb52c9"
+  integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
+
 "@heroui/accordion@2.2.24":
   version "2.2.24"
   resolved "https://registry.yarnpkg.com/@heroui/accordion/-/accordion-2.2.24.tgz#170b5ff216c691e321ad4fafb40ab6ced31c6bf9"

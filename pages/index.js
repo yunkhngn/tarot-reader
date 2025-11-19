@@ -1,22 +1,29 @@
 import { useRouter } from 'next/router';
 import { Card, CardBody, Button } from '@heroui/react';
 import AppNavbar from '../components/Navbar';
+import Metadata from '../components/Metadata';
 
 export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a]">
+    <>
+      <Metadata 
+        title="Tarot Reader - Bói Bài Tarot Miễn Phí"
+        description="Bói bài Tarot miễn phí trực tuyến. Khám phá những thông điệp bí ẩn từ vũ trụ, giải quyết những vấn đề trong tình yêu, công việc và cuộc sống."
+        image="/tarot.jpeg"
+      />
+      <div className="min-h-screen bg-[#1a1a1a]">
       <AppNavbar />
       
       <div className="container mx-auto px-4 py-20 max-w-6xl">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-4xl md:text-5xl font-serif text-[#D4AF37] mb-6">
-              TAROTREADER.ME - BÓI BÀI TAROT MIỄN PHÍ
+              TAROT.YUNKHNGN.DEV
             </h1>
             <p className="text-white/80 text-lg leading-relaxed mb-8">
-              Chào mừng bạn đến với TarotReader.me - nơi bạn có thể bói bài Tarot miễn phí trực tuyến. 
+              Chào mừng bạn đến với Tarot Reader - nơi bạn có thể bói bài Tarot miễn phí trực tuyến. 
               Khám phá những thông điệp bí ẩn từ vũ trụ, giải quyết những vấn đề trong tình yêu, công việc và cuộc sống. 
               Tìm kiếm sự cân bằng và hướng dẫn cho hành trình của bạn.
             </p>
@@ -25,14 +32,13 @@ export default function Home() {
               className="bg-white text-black hover:bg-gray-200 font-semibold px-8 py-6 text-lg"
               onClick={() => router.push('/reading')}
             >
-              <span className="mr-2">⭐</span> BÓI TAROT NGAY
+              BÓI TAROT NGAY
             </Button>
           </div>
           
           <div className="hidden md:block">
             {/* Placeholder for decorative graphic */}
-            <div className="w-full h-96 bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a] rounded-lg border border-gray-700 flex items-center justify-center">
-              <span className="text-6xl">🔮</span>
+            <div className="w-full h-96 bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a] rounded-lg border border-gray-700">
             </div>
           </div>
         </div>
@@ -47,6 +53,7 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

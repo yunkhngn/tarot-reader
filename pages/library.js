@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, Input, Spinner } from '@heroui/react';
 import AppNavbar from '../components/Navbar';
+import Metadata from '../components/Metadata';
 
 export default function Library() {
   const [cards, setCards] = useState([]);
@@ -26,13 +27,19 @@ export default function Library() {
   );
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a]">
-      <AppNavbar />
+    <>
+      <Metadata 
+        title="Library Bài Tarot - Xem Tất Cả 78 Lá Bài"
+        description="Khám phá tất cả 78 lá bài Tarot và ý nghĩa chi tiết của chúng. Tìm hiểu về Major Arcana và Minor Arcana."
+        image="/tarot.jpeg"
+      />
+      <div className="min-h-screen bg-[#1a1a1a]">
+        <AppNavbar />
       
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-6 mb-8">
           <h1 className="text-4xl font-serif text-[#D4AF37] mb-4 text-center">
-            📚 Library Bài Tarot
+            Library Bài Tarot
           </h1>
           <p className="text-white/80 mb-6 text-center text-lg">
             Khám phá tất cả 78 lá bài Tarot và ý nghĩa của chúng
@@ -119,7 +126,8 @@ export default function Library() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
