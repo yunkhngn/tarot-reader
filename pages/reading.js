@@ -4,10 +4,20 @@ import {
   CardBody, 
   Input, 
   Button, 
-  Textarea,
   Spinner
 } from '@heroui/react';
 import AppNavbar from '../components/Navbar';
+
+const suggestedQuestions = [
+  "Mối quan hệ tiếp theo của tôi có khả năng kéo dài không?",
+  "Người yêu cũ của tôi có còn tình cảm với tôi không?",
+  "Liệu tôi có vượt qua được những thử thách sắp tới không?",
+  "Tôi có thể mong đợi sự cải thiện nào trong tình hình tài chính của mình không?",
+  "Khi nào tôi sẽ gặp được tình yêu mới?",
+  "Sự nghiệp của tôi trong năm tới sẽ phát triển như thế nào?",
+  "Tôi nên làm gì để cải thiện cuộc sống của mình?",
+  "Điều gì đang chờ đợi tôi trong tương lai gần?"
+];
 
 export default function Reading() {
   const [question, setQuestion] = useState('');

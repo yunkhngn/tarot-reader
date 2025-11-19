@@ -1,4 +1,5 @@
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from '@heroui/react';
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link as HeroUILink } from '@heroui/react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 export default function AppNavbar() {
@@ -11,24 +12,28 @@ export default function AppNavbar() {
       isBordered
     >
       <NavbarBrand>
-        <p className="font-bold text-white text-xl">🔮 Tarot Reader</p>
+        <Link href="/" className="font-bold text-white text-xl hover:opacity-80 transition-opacity">
+          🔮 Tarot Reader
+        </Link>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem isActive={router.pathname === '/reading'}>
-          <Link 
+          <HeroUILink 
+            as={Link}
             href="/reading"
             className={router.pathname === '/reading' ? 'text-white font-semibold' : 'text-white/80'}
           >
             Bói Tarot
-          </Link>
+          </HeroUILink>
         </NavbarItem>
         <NavbarItem isActive={router.pathname === '/library'}>
-          <Link 
+          <HeroUILink 
+            as={Link}
             href="/library"
             className={router.pathname === '/library' ? 'text-white font-semibold' : 'text-white/80'}
           >
             Library Bài
-          </Link>
+          </HeroUILink>
         </NavbarItem>
       </NavbarContent>
     </Navbar>

@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* HeroUI Base Styles */
+@layer base {
+  :root {
+    --heroui-background: 0 0% 100%;
+    --heroui-foreground: 222.2 84% 4.9%;
+  }
+  
+  .dark {
+    --heroui-background: 222.2 84% 4.9%;
+    --heroui-foreground: 210 40% 98%;
+  }
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
