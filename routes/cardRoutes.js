@@ -483,4 +483,19 @@ router.get("/onecard", (req, res) => {
   res.json(randomCard);
 });
 
+router.get("/threecards", (req, res) => {
+  // Create a copy of the array to avoid modifying the original
+  const shuffled = [...tarotCards];
+  
+  // Fisher-Yates shuffle algorithm
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  // Return first 3 cards from shuffled array
+  const threeCards = shuffled.slice(0, 3);
+  res.json(threeCards);
+});
+
 module.exports = router;
