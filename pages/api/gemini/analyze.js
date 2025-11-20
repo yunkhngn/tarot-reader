@@ -10,6 +10,40 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Check origin/referer to prevent external API calls
+    const origin = req.headers.origin || req.headers.referer || '';
+    const allowedOrigins = process.env.ALLOWED_ORIGINS 
+      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+      : [];
+    
+    // In production, check if origin is allowed
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction && allowedOrigins.length > 0) {
+      const isAllowed = allowedOrigins.some(allowedOrigin => {
+        if (!origin) return false;
+        try {
+          const originUrl = new URL(origin);
+          const allowedUrl = new URL(allowedOrigin);
+          return originUrl.hostname === allowedUrl.hostname;
+        } catch {
+          return origin.includes(allowedOrigin);
+        }
+      });
+      
+      if (!isAllowed) {
+        return res.status(403).json({ 
+          error: 'Forbidden',
+          message: 'This API endpoint is not accessible from external domains.'
+        });
+      }
+    } else if (isProduction && !origin) {
+      // In production, require origin/referer header
+      return res.status(403).json({ 
+        error: 'Forbidden',
+        message: 'Origin or Referer header is required.'
+      });
+    }
+    
     // Rate limiting check
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || 
                      req.headers['x-real-ip'] || 

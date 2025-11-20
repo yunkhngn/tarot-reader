@@ -45,6 +45,8 @@ HCAPTCHA_SITE_KEY=your_hcaptcha_site_key_here
 HCAPTCHA_SECRET=your_hcaptcha_secret_here
 ```
 
+**Note:** `ALLOWED_ORIGINS` is only needed in production. For development, the API will work without it. See the Production Deployment section below for details.
+
 4. **Run the development server:**
 ```bash
 npm run dev
@@ -213,6 +215,8 @@ POST /api/gemini/analyze
 
 Analyzes three selected Tarot cards using Google Gemini AI based on a user's question.
 
+**Note:** This endpoint is restricted to requests from allowed origins only (configured via `ALLOWED_ORIGINS` environment variable). External API calls will be rejected with a 403 Forbidden error.
+
 **Request Body:**
 ```json
 {
@@ -246,6 +250,14 @@ Analyzes three selected Tarot cards using Google Gemini AI based on a user's que
   ```json
   {
     "error": "Invalid request. Question and 3 cards are required."
+  }
+  ```
+
+- `403 Forbidden`: Request from unauthorized origin (production only)
+  ```json
+  {
+    "error": "Forbidden",
+    "message": "This API endpoint is not accessible from external domains."
   }
   ```
 
@@ -333,6 +345,7 @@ Required environment variables:
 - `GEMINI_API_KEY`: Your Google Gemini API key
 - `HCAPTCHA_SITE_KEY`: Your hCaptcha site key (production only)
 - `HCAPTCHA_SECRET`: Your hCaptcha secret key (production only)
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed origins for the Gemini API endpoint (production only). Example: `https://yourdomain.com,https://www.yourdomain.com`
 
 ## Build & Deploy
 
@@ -357,7 +370,31 @@ vercel
 
 Or connect your GitHub repository to Vercel for automatic deployments.
 
-Make sure to add all required environment variables in your Vercel project settings.
+**Important:** Make sure to add all required environment variables in your Vercel project settings:
+
+1. Go to your Vercel project dashboard
+2. Navigate to Settings → Environment Variables
+3. Add the following variables:
+
+**Required for all environments:**
+- `GEMINI_API_KEY`: Your Google Gemini API key
+
+**Required for Production only:**
+- `HCAPTCHA_SITE_KEY`: Your hCaptcha site key
+- `HCAPTCHA_SECRET`: Your hCaptcha secret key
+- `ALLOWED_ORIGINS`: Your production domain(s), comma-separated
+
+**Example for ALLOWED_ORIGINS:**
+```
+https://tarot.yunkhngn.dev
+```
+
+If you have multiple domains (e.g., with and without www):
+```
+https://tarot.yunkhngn.dev,https://www.tarot.yunkhngn.dev
+```
+
+**Note:** The `ALLOWED_ORIGINS` variable is critical for production security. Without it, the Gemini API endpoint will reject all requests. Make sure to set it to your actual production domain(s).
 
 ## Rate Limiting
 
@@ -379,8 +416,9 @@ Rate limit information is returned in error responses:
 
 ## Security
 
+- **Origin Restriction**: The Gemini API endpoint (`/api/gemini/analyze`) is restricted to only allow requests from configured domains (via `ALLOWED_ORIGINS`). External API calls are blocked with a 403 Forbidden error.
 - **hCaptcha**: Integrated for bot protection in production environment only
-- **Rate Limiting**: Prevents API abuse and excessive usage
+- **Rate Limiting**: Prevents API abuse and excessive usage (5 minutes per request in production)
 - **Environment Variables**: Sensitive keys stored securely
 - **Input Validation**: All API endpoints validate request data
 
