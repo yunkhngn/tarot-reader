@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardBody, Button, Spinner, Textarea } from '@heroui/react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import Image from 'next/image';
 import AppNavbar from '../components/Navbar';
 import Metadata from '../components/Metadata';
 
@@ -279,7 +280,6 @@ export default function Reading() {
       !text-white
       placeholder:text-[#5f5f60]
       text-base sm:text-lg
-      !pr-14 sm:!pr-16
       [-webkit-text-fill-color:rgba(255,255,255,0.96)]
     `,
     innerWrapper: `
@@ -317,26 +317,6 @@ export default function Reading() {
     }
   }}
 />
-                <button
-                  onClick={handleAnalyze}
-                  disabled={isSubmitting || !question.trim() || selectedCards.length !== 3}
-                  className={`
-                    absolute top-1/2 right-4 sm:right-5 -translate-y-1/2
-                    w-10 h-10 sm:w-12 sm:h-12
-                    flex items-center justify-center
-                    rounded-full
-                    bg-[#353535]
-                    shadow-[0_8px_20px_rgba(0,0,0,0.45)]
-                    transition-all
-                    z-10
-                    ${isSubmitting || !question.trim() || selectedCards.length !== 3
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:scale-[1.07]"
-                    }
-                  `}
-                >
-                  <span className="text-white text-base sm:text-lg">↑</span>
-                </button>
               </div>
             </div>
 
@@ -425,12 +405,26 @@ export default function Reading() {
                   >
                     <div className="card-inner">
                       <div className="card-face card-back">
-                        <img src="/image/backside.png" alt="Mặt sau lá bài" className="w-full h-full object-cover" />
+                        <div className="relative w-full h-full">
+                          <Image 
+                            src="/image/backside.png" 
+                            alt="Mặt sau lá bài" 
+                            fill
+                            className="object-cover"
+                            sizes="110px"
+                          />
+                        </div>
                       </div>
                       <div className="card-face card-front">
-                        <img src={card.image} alt={card.name} className="w-full h-full object-cover
-                        
-                        " />
+                        <div className="relative w-full h-full">
+                          <Image 
+                            src={card.image} 
+                            alt={card.name} 
+                            fill
+                            className="object-cover"
+                            sizes="110px"
+                          />
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -445,16 +439,56 @@ export default function Reading() {
             <h2 className="text-center text-[#c08b45] uppercase tracking-[0.3em] text-sm mb-4">
               Lá bài đã chọn
             </h2>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-6">
               {selectedCards.map((card, index) => (
-                <div key={`${card.name}-selected-${index}`} className="w-28 sm:w-32">
-                  <div className="overflow-hidden rounded-xl border border-[#2f2f32] shadow-[0_15px_45px_rgba(0,0,0,0.45)] mb-2">
-                    <img src={card.image} alt={card.name} className="w-full h-40 object-cover" />
+                <div key={`${card.name}-selected-${index}`} className="w-48 sm:w-56 md:w-64">
+                  <div className="relative overflow-hidden rounded-xl border border-[#2f2f32] shadow-[0_15px_45px_rgba(0,0,0,0.45)] mb-3" style={{ aspectRatio: '3 / 5' }}>
+                    <Image 
+                      src={card.image} 
+                      alt={card.name} 
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 192px, (max-width: 768px) 224px, 256px"
+                    />
                   </div>
-                    <p className="text-center text-white text-sm font-semibold">{card.name}</p>
+                    <p className="text-center text-white text-base sm:text-lg font-semibold">{card.name}</p>
                 </div>
               ))}
             </div>
+            
+            {selectedCards.length === 3 && (
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={isSubmitting || !question.trim()}
+                  size="lg"
+                  className={`
+                    bg-[#c08b45]
+                    hover:bg-[#d4a052]
+                    text-white
+                    font-semibold
+                    px-8 py-6
+                    rounded-[20px]
+                    text-base sm:text-lg
+                    shadow-[0_8px_25px_rgba(192,139,69,0.3)]
+                    transition-all
+                    ${isSubmitting || !question.trim()
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:scale-[1.02] hover:shadow-[0_12px_35px_rgba(192,139,69,0.4)]"
+                    }
+                  `}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Spinner size="sm" className="mr-2" />
+                      Đang phân tích...
+                    </>
+                  ) : (
+                    'Phân tích bài Tarot'
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
