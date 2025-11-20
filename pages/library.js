@@ -52,7 +52,7 @@ export default function Library() {
         description="Khám phá tất cả 78 lá bài Tarot và ý nghĩa chi tiết của chúng. Tìm hiểu về Major Arcana và Minor Arcana."
         image="/tarot.jpeg"
       />
-      <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
+      <div className="min-h-screen bg-[#0b0a0a] flex flex-col">
         <AppNavbar />
       
       <div className="container mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-7xl flex-1">

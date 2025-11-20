@@ -10,7 +10,7 @@ export default function ApiDocs() {
         description="API documentation for Tarot Reader. Get all cards, random cards, and more."
         image="/tarot.jpeg"
       />
-      <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
+      <div className="min-h-screen bg-[#0b0a0a] flex flex-col">
         <AppNavbar />
         
         <div className="container mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 max-w-4xl flex-1">

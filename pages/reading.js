@@ -299,7 +299,7 @@ export default function Reading() {
         description="Chọn 3 lá bài Tarot bạn cảm thấy kết nối nhất và nhận thông điệp phân tích từ Tarot Reader."
         image="/tarot.jpeg"
       />
-      <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
+      <div className="min-h-screen bg-[#0b0a0a] flex flex-col">
         <AppNavbar />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 max-w-5xl flex-1">
