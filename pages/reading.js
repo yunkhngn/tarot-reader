@@ -11,10 +11,12 @@ import Footer from '../components/Footer';
 const DISPLAY_CARD_COUNT = 12;
 
 const suggestedQuestions = [
-  "Mối quan hệ mới này có phải là True Love của tôi không?",
+  "Mối quan hệ mới này có phải là tình yêu tôi đang tìm kiếm?",
   "Người ấy có hối tiếc về việc chia tay không?",
   "Tôi sẽ gặp những cơ hội quan trọng nào trong tương lai gần?",
-  "Tôi nên tiếp tục công việc hiện tại hay tìm kiếm một hướng đi mới?"
+  "Tôi nên tiếp tục công việc hiện tại hay tìm kiếm một hướng đi mới?",
+  "Tôi còn nhớ người yêu cũ nhưng mà cô ấy có người yêu mới rồi!",
+  "Tôi cảm thấy bế tắc trong cuộc sống và áp lực quá nhiều!"
 ];
 
 const shuffle = (array) => {
@@ -471,7 +473,7 @@ export default function Reading() {
 
           {isLoadingCards ? (
             <div className="py-20 flex justify-center">
-              <Spinner size="lg" className="text-[#D4AF37]" />
+              <Spinner size="lg" className="text-[#d5a052]" />
             </div>
           ) : (
             <div 
@@ -599,7 +601,7 @@ export default function Reading() {
                   >
                     {isSubmitting ? (
                       <>
-                        <Spinner size="sm" className="mr-2" />
+                        <Spinner size="sm" className="mr-2 text-[#d5a052]" />
                         Đang phân tích...
                       </>
                     ) : (
@@ -615,7 +617,7 @@ export default function Reading() {
         {isSubmitting && (
           <div className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-12 mb-10">
             <div className="flex flex-col items-center justify-center gap-4">
-              <Spinner size="lg" className="text-[#D4AF37]" />
+              <Spinner size="lg" className="text-[#d5a052]" />
               <p className="text-white/80 text-center text-lg">Đang lắng nghe thông điệp từ vũ trụ...</p>
             </div>
           </div>

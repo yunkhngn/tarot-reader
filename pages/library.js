@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { Card, CardBody, Input, Spinner, Button } from '@heroui/react';
 import Image from 'next/image';
 import AppNavbar from '../components/Navbar';
@@ -6,6 +7,7 @@ import Metadata from '../components/Metadata';
 import Footer from '../components/Footer';
 
 export default function Library() {
+  const router = useRouter();
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +51,7 @@ export default function Library() {
     <>
       <Metadata 
         title="Library Bài Tarot - Xem Tất Cả 78 Lá Bài"
-        description="Khám phá tất cả 78 lá bài Tarot và ý nghĩa chi tiết của chúng. Tìm hiểu về Major Arcana và Minor Arcana."
+        description="Khám phá tất cả 78 lá bài Tarot và ý nghĩa chi tiết của chúng. Tìm hiểu về Major Arcana và Minor Arcana bằng cách click vào từng lá bài để đọc thêm thông tin cậu nhé. "
         image="/tarot.jpeg"
       />
       <div className="min-h-screen bg-[#0b0a0a] flex flex-col">
@@ -65,7 +67,7 @@ export default function Library() {
               Library Bài Tarot
             </h1>
             <p className="text-white/70 text-center max-w-2xl mx-auto text-sm sm:text-base leading-relaxed mb-6">
-              Khám phá tất cả 78 lá bài Tarot và ý nghĩa của chúng. Hover vào lá bài để xem tên, click để xem chi tiết.
+            Khám phá tất cả 78 lá bài Tarot và ý nghĩa chi tiết của chúng. Tìm hiểu về Major Arcana và Minor Arcana bằng cách click vào từng lá bài để đọc thêm thông tin cậu nhé.
             </p>
             
             <div className="max-w-2xl mx-auto">
@@ -110,7 +112,7 @@ export default function Library() {
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <Spinner size="lg" className="text-[#D4AF37]" />
+            <Spinner size="lg" className="text-[#d5a052]" />
           </div>
         ) : (
           <>
@@ -215,7 +217,7 @@ export default function Library() {
             onClick={() => setSelectedCard(null)}
           >
             <div 
-              className="relative bg-[#1b1918] border border-[#453628] rounded-[32px] shadow-[0_35px_120px_rgba(0,0,0,0.7)] max-w-3xl w-full h-[95vh] flex flex-col"
+              className="relative bg-[#1b1918] border border-[#453628] rounded-[32px] shadow-[0_35px_120px_rgba(0,0,0,0.7)] max-w-4xl w-full h-[95vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="absolute top-4 left-6 z-10">
@@ -230,21 +232,48 @@ export default function Library() {
                 ×
               </button>
               
-              <div className="flex-1 overflow-y-auto p-8 pt-16">
-                <h2 className="text-4xl font-serif text-[#c8a05e] mb-6">
+              <div className="flex-1 overflow-y-auto px-6 sm:px-8 lg:px-10 pt-16 pb-6 sm:pb-8 lg:pb-10 scrollbar-hide">
+                <h2 className="text-3xl sm:text-4xl font-serif text-[#c8a05e] mb-8 lg:mb-10 text-center lg:text-left">
                   {selectedCard.name}
                 </h2>
-                <div className="relative w-full rounded-2xl overflow-hidden border border-[#2f2620] shadow-[0_25px_70px_rgba(0,0,0,0.45)] mb-6 bg-[#0f0e0d] flex justify-center" style={{ aspectRatio: '3 / 5', maxWidth: '400px', margin: '0 auto' }}>
-                  <Image
-                    src={selectedCard.image}
-                    alt={selectedCard.name}
-                    fill
-                    className="object-contain"
-                    sizes="400px"
-                  />
-                </div>
-                <div className="text-white/90 leading-relaxed whitespace-pre-line break-words text-lg font-light pb-4">
-                  {selectedCard.description}
+                
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+                  {/* Image Section */}
+                  <div className="flex-shrink-0 lg:w-1/2 flex justify-center lg:justify-start">
+                    <div className="relative w-full max-w-[350px] rounded-2xl overflow-hidden border border-[#2f2620] shadow-[0_25px_70px_rgba(0,0,0,0.45)] bg-[#0f0e0d]" style={{ aspectRatio: '3 / 5' }}>
+                      <Image
+                        src={selectedCard.image}
+                        alt={selectedCard.name}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 1024px) 100vw, 350px"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Description Section */}
+                  <div className="flex-1 lg:w-1/2 lg:pt-2 flex flex-col">
+                    <div className="text-white/90 leading-relaxed whitespace-pre-line break-words text-base sm:text-lg font-light space-y-4 mb-6">
+                      {selectedCard.description.split('\n\n').map((paragraph, index) => (
+                        <p key={index} className="mb-4 last:mb-0">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                    
+                    <div className="mt-4">
+                      <Button
+                        onClick={() => {
+                          setSelectedCard(null);
+                          router.push('/reading');
+                        }}
+                        className="bg-[#c08b45] hover:bg-[#d4a052] text-white font-semibold text-base sm:text-lg px-8 py-6 rounded-none border-2 border-black w-full lg:w-auto"
+                      >
+                        <span className="nav-star mr-2">✦</span>
+                        BÓI TAROT NGAY
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

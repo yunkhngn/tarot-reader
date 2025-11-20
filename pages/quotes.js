@@ -88,7 +88,7 @@ export default function Quotes() {
 
             {loading ? (
               <div className="flex justify-center items-center py-20">
-                <Spinner size="lg" className="text-[#D4AF37]" />
+                <Spinner size="lg" className="text-[#d5a052]" />
               </div>
             ) : error ? (
               <Card className="bg-[#111010] border-2 border-red-500/30 rounded-lg p-8">

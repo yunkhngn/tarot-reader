@@ -217,7 +217,7 @@ export default function Home() {
                 },
                 {
                   question: 'TÔI CÓ THỂ LIÊN HỆ TAROT.YUNKHNGN.DEV Ở ĐÂU?',
-                  answer: 'Bạn có thể liên hệ với chúng tôi qua các kênh thông tin được cung cấp trong phần Footer của website.'
+                  answer: 'Bạn có thể liên hệ với tôi qua các kênh thông tin được cung cấp trong phần Footer của website hoặc là qua email yunkhngn.mail@gmail.com'
                 }
               ].map((faq, index) => (
                 <FAQItem key={index} question={faq.question} answer={faq.answer} />
