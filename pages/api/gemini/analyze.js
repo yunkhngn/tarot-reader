@@ -64,8 +64,6 @@ export default async function handler(req, res) {
     const { question, cards, hCaptchaToken } = req.body;
 
     // Verify hCaptcha only in production
-    const isProduction = process.env.NODE_ENV === 'production';
-    
     if (isProduction) {
       if (!hCaptchaToken) {
         return res.status(400).json({ error: 'hCaptcha verification required' });
