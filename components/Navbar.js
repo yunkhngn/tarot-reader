@@ -72,7 +72,7 @@ export default function AppNavbar() {
       </Navbar>
 
       {menuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm">
+        <div className="lg:hidden fixed inset-0 z-50 bg-[#0b0a0a]">
           <div className="flex justify-end p-4">
             <button
               onClick={() => setMenuOpen(false)}
@@ -87,7 +87,7 @@ export default function AppNavbar() {
               <Link key={link.key} href={link.href}>
                 <span
                   onClick={() => setMenuOpen(false)}
-                  className="block text-white/90 border border-[#2f2f32] rounded-2xl px-5 py-4 text-center tracking-[0.3em] uppercase hover:border-[#d5a052] transition-colors"
+                  className="block text-white border-2 border-white/30 rounded-lg px-5 py-4 text-center tracking-[0.3em] uppercase hover:bg-white/10 hover:border-white/50 transition-all"
                 >
                   <span className="nav-star mr-2">✦</span>
                   {link.label}

@@ -38,10 +38,13 @@ export default function Reading() {
   const [isDragging, setIsDragging] = useState(false);
   const [hCaptchaToken, setHCaptchaToken] = useState(null);
   const [hCaptchaSiteKey, setHCaptchaSiteKey] = useState(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const analysisRef = useRef(null);
   const rowRef = useRef(null);
   const hCaptchaRef = useRef(null);
+  const cooldownIntervalRef = useRef(null);
   const isProduction = process.env.NODE_ENV === 'production';
+  const COOLDOWN_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -76,6 +79,38 @@ export default function Reading() {
       fetchHCaptchaSiteKey();
     }
   }, [isProduction]);
+
+  // Check cooldown on mount and set up interval
+  useEffect(() => {
+    if (!isProduction) return;
+
+    const checkCooldown = () => {
+      const lastSubmitTime = localStorage.getItem('lastTarotSubmit');
+      if (!lastSubmitTime) {
+        setCooldownRemaining(0);
+        return;
+      }
+
+      const elapsed = Date.now() - parseInt(lastSubmitTime, 10);
+      const remaining = COOLDOWN_DURATION - elapsed;
+
+      if (remaining > 0) {
+        setCooldownRemaining(remaining);
+      } else {
+        setCooldownRemaining(0);
+        localStorage.removeItem('lastTarotSubmit');
+      }
+    };
+
+    checkCooldown();
+    cooldownIntervalRef.current = setInterval(checkCooldown, 1000);
+
+    return () => {
+      if (cooldownIntervalRef.current) {
+        clearInterval(cooldownIntervalRef.current);
+      }
+    };
+  }, [isProduction, COOLDOWN_DURATION]);
 
   const resetSpread = () => {
     if (!allCards.length) return;
@@ -204,6 +239,12 @@ export default function Reading() {
       alert('Vui lòng hoàn thành xác thực hCaptcha');
       return;
     }
+    if (isProduction && cooldownRemaining > 0) {
+      const minutes = Math.floor(cooldownRemaining / 60000);
+      const seconds = Math.floor((cooldownRemaining % 60000) / 1000);
+      alert(`Vui lòng đợi ${minutes} phút ${seconds} giây trước khi bói lại.`);
+      return;
+    }
     analyzeCards(selectedCards);
   };
 
@@ -263,6 +304,12 @@ export default function Reading() {
         throw new Error(data.error);
       }
       setAnalysis(data.analysis);
+
+      // Save submit time for cooldown (only in production)
+      if (isProduction) {
+        localStorage.setItem('lastTarotSubmit', Date.now().toString());
+        setCooldownRemaining(COOLDOWN_DURATION);
+      }
 
       // Reset hCaptcha after successful submission (only in production)
       if (isProduction && hCaptchaRef.current) {
@@ -519,35 +566,47 @@ export default function Reading() {
                     />
                   </div>
                 )}
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={isSubmitting || !question.trim() || (isProduction && !hCaptchaToken)}
-                  size="lg"
-                  className={`
-                    bg-[#c08b45]
-                    hover:bg-[#d4a052]
-                    text-white
-                    font-semibold
-                    px-8 py-6
-                    rounded-[20px]
-                    text-base sm:text-lg
-                    shadow-[0_8px_25px_rgba(192,139,69,0.3)]
-                    transition-all
-                    ${isSubmitting || !question.trim() || !hCaptchaToken
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:scale-[1.02] hover:shadow-[0_12px_35px_rgba(192,139,69,0.4)]"
-                    }
-                  `}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Spinner size="sm" className="mr-2" />
-                      Đang phân tích...
-                    </>
-                  ) : (
-                    'Phân tích bài Tarot'
+                <div className="flex flex-col items-center gap-3">
+                  {isProduction && cooldownRemaining > 0 && (
+                    <p className="text-white/70 text-sm">
+                      Cooldown: {Math.floor(cooldownRemaining / 60000)}:{(Math.floor((cooldownRemaining % 60000) / 1000)).toString().padStart(2, '0')}
+                    </p>
                   )}
-                </Button>
+                  <Button
+                    onClick={handleAnalyze}
+                    disabled={
+                      isSubmitting || 
+                      !question.trim() || 
+                      (isProduction && !hCaptchaToken) ||
+                      (isProduction && cooldownRemaining > 0)
+                    }
+                    size="lg"
+                    className={`
+                      bg-[#c08b45]
+                      hover:bg-[#d4a052]
+                      text-white
+                      font-semibold
+                      px-8 py-6
+                      rounded-[20px]
+                      text-base sm:text-lg
+                      shadow-[0_8px_25px_rgba(192,139,69,0.3)]
+                      transition-all
+                      ${isSubmitting || !question.trim() || (isProduction && !hCaptchaToken) || (isProduction && cooldownRemaining > 0)
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:scale-[1.02] hover:shadow-[0_12px_35px_rgba(192,139,69,0.4)]"
+                      }
+                    `}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Spinner size="sm" className="mr-2" />
+                        Đang phân tích...
+                      </>
+                    ) : (
+                      'Phân tích bài Tarot'
+                    )}
+                  </Button>
+                </div>
               </div>
             )}
           </div>

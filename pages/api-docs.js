@@ -66,20 +66,84 @@ export default function ApiDocs() {
                 </p>
               </div>
             </div>
+
+            <div className="bg-[#111010] border border-[#2a1f17] rounded-2xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <code className="bg-[#2a2a2a] px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 text-[#D4AF37] font-mono text-sm sm:text-base whitespace-nowrap w-fit">
+                    GET /api/quotes
+                  </code>
+                  <span className="text-white/90 text-base sm:text-lg font-medium">Get all quotes</span>
+                </div>
+                <p className="text-white/70 text-sm sm:text-base leading-relaxed">
+                  Trả về danh sách tất cả các câu nói truyền cảm hứng với thông tin chi tiết.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#111010] border border-[#2a1f17] rounded-2xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <code className="bg-[#2a2a2a] px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 text-[#D4AF37] font-mono text-sm sm:text-base whitespace-nowrap w-fit">
+                    GET /api/quotes/daily
+                  </code>
+                  <span className="text-white/90 text-base sm:text-lg font-medium">Get quote of the day</span>
+                </div>
+                <p className="text-white/70 text-sm sm:text-base leading-relaxed">
+                  Trả về câu nói của ngày hôm nay. Mỗi ngày sẽ có cùng một câu nói dựa trên ngày trong năm.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="mt-12 bg-[#111010] border border-[#2a1f17] rounded-2xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
             <h2 className="text-xl sm:text-2xl font-serif text-[#D4AF37] mb-4">Response Format</h2>
-            <p className="text-white/70 text-sm sm:text-base mb-4">
-              Tất cả các endpoints trả về dữ liệu dưới dạng JSON với cấu trúc:
-            </p>
-            <pre className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-4 overflow-x-auto text-sm text-white/80">
+            
+            <div className="mb-6">
+              <p className="text-white/70 text-sm sm:text-base mb-3">
+                <strong className="text-[#D4AF37]">Card Endpoints</strong> trả về dữ liệu dưới dạng JSON:
+              </p>
+              <pre className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-4 overflow-x-auto text-sm text-white/80">
 {`{
   "name": "The Fool",
   "image": "/tarotdeck/thefool.jpeg",
   "description": "..."
 }`}
-            </pre>
+              </pre>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-white/70 text-sm sm:text-base mb-3">
+                <strong className="text-[#D4AF37]">GET /api/quotes</strong> trả về:
+              </p>
+              <pre className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-4 overflow-x-auto text-sm text-white/80">
+{`{
+  "quotes": [
+    {
+      "id": 1,
+      "text": "Không ai sống hộ cuộc đời mình...",
+      "category": "life"
+    },
+    ...
+  ],
+  "total": 503
+}`}
+              </pre>
+            </div>
+
+            <div>
+              <p className="text-white/70 text-sm sm:text-base mb-3">
+                <strong className="text-[#D4AF37]">GET /api/quotes/daily</strong> trả về:
+              </p>
+              <pre className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-4 overflow-x-auto text-sm text-white/80">
+{`{
+  "quote": "Không ai sống hộ cuộc đời mình...",
+  "category": "life",
+  "id": 1,
+  "date": "2025-01-21"
+}`}
+              </pre>
+            </div>
           </div>
         </div>
 

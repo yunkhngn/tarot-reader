@@ -96,17 +96,17 @@ YÊU CẦU FORMAT MARKDOWN:
 - Format rõ ràng, dễ đọc với markdown
 
 CẤU TRÚC:
-**1. Ý nghĩa tổng quan**
+**1. Ý nghĩa tổng quan:**
 - Phân tích ngắn gọn về 3 lá bài trong bối cảnh câu hỏi
 - Sử dụng **in đậm** cho tên lá bài quan trọng
 - Khoảng 3-4 dòng
 
-**2. Mối liên hệ**
+**2. Mối liên hệ:**
 - Giải thích mối liên hệ giữa quá khứ, hiện tại và tương lai
 - Sử dụng *in nghiêng* để nhấn mạnh điểm quan trọng
 - Khoảng 3-4 dòng
 
-**3.: Lời khuyên**
+**3.: Lời khuyên:**
 - Đưa ra lời khuyên cụ thể dựa trên kết quả
 - Sử dụng gạch đầu dòng (-) cho các lời khuyên
 - Khoảng 3-4 dòng
@@ -115,7 +115,9 @@ CẤU TRÚC:
 - Tóm tắt và triển vọng
 - Khoảng 3-4 dòng
 
-Hãy viết ngắn gọn, súc tích, sử dụng markdown để làm nổi bật các phần quan trọng.`;
+**Bói toán bởi**
+_Hệ thống AI tiên tri Tarot của yunkhngn_
+Hãy viết ngắn gọn, súc tích, có xuống dòng ở các đầu mục, sử dụng markdown để làm nổi bật các phần quan trọng.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
