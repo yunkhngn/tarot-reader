@@ -20,40 +20,40 @@ export default function Home() {
         <AppNavbar />
         
         {/* Hero Section - Full Height */}
-        <div className="w-full border-b border-white/10 flex-1 flex items-center">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl w-full py-12 sm:py-16">
-            <div className="grid gap-8 lg:gap-12 items-center lg:grid-cols-2">
-              <div className="text-center lg:text-left">
-                <p className="tracking-[0.5em] text-xs text-[#d5a052] uppercase mb-4">Tarot Reader</p>
-                <h1 className="text-3xl sm:text-4xl font-serif text-[#D4AF37] mb-4">
+        <div className="w-full border-b border-white/10 min-h-[calc(100vh-80px)] flex">
+          <div className="grid grid-cols-1 lg:grid-cols-2 w-full">
+            {/* Content Section */}
+            <div className="flex items-center justify-center p-6 sm:p-8 md:p-12 lg:p-16">
+              <div className="text-center lg:text-left max-w-2xl">
+                <p className="tracking-[0.5em] text-xs sm:text-sm md:text-base text-[#d5a052] uppercase mb-4 sm:mb-6">Tarot Reader</p>
+                <h1 className="text-3xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-4xl font-serif text-[#D4AF37] mb-4 sm:mb-6">
                   TAROT.YUNKHNGN.DEV
                 </h1>
-                <p className="text-white/80 text-base sm:text-lg leading-relaxed mb-8">
+                <p className="text-white/80 text-sm sm:text-base md:text-base lg:text-base xl:text-xl leading-relaxed mb-6 sm:mb-8 lg:mb-10">
                   Chào mừng bạn đến với Tarot Reader - nơi bạn có thể bói bài Tarot miễn phí trực tuyến. 
                   Khám phá những thông điệp bí ẩn từ vũ trụ, giải quyết những vấn đề trong tình yêu, công việc và cuộc sống. 
                   Tìm kiếm sự cân bằng và hướng dẫn cho hành trình của bạn.
                 </p>
                 
                 <Button
-                  className="bg-white text-black hover:bg-gray-200 font-semibold text-base rounded-none border-2 border-black"
+                  className="bg-white text-black hover:bg-gray-200 font-semibold text-sm sm:text-base md:text-lg lg:text-xl px-6 sm:px-8 py-4 sm:py-5 md:py-6 rounded-none border-2 border-black"
                   onClick={() => router.push('/reading')}
                 >
                   <span className="nav-star mr-2">✦</span>
                   BÓI TAROT NGAY
                 </Button>
               </div>
-              
-              <div className="w-full">
-                <div className="relative w-full h-60 sm:h-72 lg:h-96 border-2 border-white/20 overflow-hidden">
-                  <Image
-                    src="/image/homepage.jpg"
-                    alt="Tarot Reader"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-              </div>
+            </div>
+            
+            {/* Image Section - Full Half Screen */}
+            <div className="relative w-full h-[50vh] lg:h-[calc(100vh-80px)]">
+              <Image
+                src="/image/homepage.jpg"
+                alt="Tarot Reader"
+                fill
+                className="object-cover"
+                priority
+              />
             </div>
           </div>
         </div>
