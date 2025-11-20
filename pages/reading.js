@@ -1,272 +1,249 @@
-import { useState, useRef } from 'react';
-import { 
-  Card, 
-  CardBody, 
-  Textarea, 
-  Button, 
-  Spinner
-} from '@heroui/react';
+import { useState, useEffect, useRef } from 'react';
+import { Card, CardBody, Button, Spinner } from '@heroui/react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import AppNavbar from '../components/Navbar';
 import Metadata from '../components/Metadata';
 
-const suggestedQuestions = [
-  "Mối quan hệ mới này có phải là True Love của tôi không?",
-  "Người ấy có hối tiếc về việc chia tay không?",
-  "Tôi sẽ gặp những cơ hội quan trọng nào trong tương lai gần?",
-  "Tôi nên tiếp tục công việc hiện tại hay tìm kiếm một hướng đi mới?"
-];
+const DEFAULT_PROMPT =
+  'Bạn là một reader Tarot chuyên nghiệp. Dựa trên 3 lá bài bên dưới, hãy đưa ra thông điệp chung, phân tích ngắn gọn (quá khứ - hiện tại - tương lai) và lời khuyên dành cho người xem. Trình bày bằng markdown.';
+const DISPLAY_CARD_COUNT = 12;
+
+const shuffle = (array) => {
+  const cloned = [...array];
+  for (let i = cloned.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+  }
+  return cloned;
+};
 
 export default function Reading() {
-  const [question, setQuestion] = useState('');
-  const [cards, setCards] = useState([]);
+  const [allCards, setAllCards] = useState([]);
+  const [deck, setDeck] = useState([]);
+  const [selectedCards, setSelectedCards] = useState([]);
+  const [revealedIndices, setRevealedIndices] = useState([]);
   const [analysis, setAnalysis] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hoveredCard, setHoveredCard] = useState(null);
+  const [isLoadingCards, setIsLoadingCards] = useState(true);
   const analysisRef = useRef(null);
 
-  const handleReading = async () => {
-    if (!question.trim()) {
-      alert('Vui lòng nhập câu hỏi của bạn');
-      return;
-    }
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const res = await fetch('/api/cards');
+        const data = await res.json();
+        setAllCards(data);
+        setDeck(shuffle(data).slice(0, DISPLAY_CARD_COUNT));
+      } catch (error) {
+        console.error(error);
+        alert('Không thể tải dữ liệu lá bài.');
+      } finally {
+        setIsLoadingCards(false);
+      }
+    };
+    fetchCards();
+  }, []);
 
+  const resetSpread = () => {
+    if (!allCards.length) return;
+    setDeck(shuffle(allCards).slice(0, DISPLAY_CARD_COUNT));
+    setSelectedCards([]);
+    setRevealedIndices([]);
+    setAnalysis('');
+  };
+
+  const handleCardSelect = (index) => {
+    if (isSubmitting) return;
+    if (revealedIndices.includes(index)) return;
+    if (selectedCards.length >= 3) return;
+
+    const updatedRevealed = [...revealedIndices, index];
+    const updatedSelected = [...selectedCards, deck[index]];
+    setRevealedIndices(updatedRevealed);
+    setSelectedCards(updatedSelected);
+
+    if (updatedSelected.length === 3) {
+      analyzeCards(updatedSelected);
+    }
+  };
+
+  const analyzeCards = async (cardsToAnalyze) => {
     setIsSubmitting(true);
     setAnalysis('');
-    setCards([]);
-
     try {
-      const cardsResponse = await fetch('/api/cards/threecards');
-      if (!cardsResponse.ok) {
-        throw new Error('Không thể lấy các lá bài');
-      }
-      const threeCards = await cardsResponse.json();
-
-      const analysisResponse = await fetch('/api/gemini/analyze', {
+      const response = await fetch('/api/gemini/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          question: question,
-          cards: threeCards,
+          question: DEFAULT_PROMPT,
+          cards: cardsToAnalyze,
         }),
       });
 
-      if (!analysisResponse.ok) {
-        const errorText = await analysisResponse.text();
+      if (!response.ok) {
+        const errorText = await response.text();
         let errorMessage = 'Không thể phân tích bài';
         try {
           const errorData = JSON.parse(errorText);
-          
-          if (analysisResponse.status === 429) {
-            errorMessage = errorData.message || `Vui lòng đợi ${errorData.remainingMinutes || 0} phút ${errorData.remainingSeconds || 0} giây trước khi bói lại.`;
-          } else if (analysisResponse.status === 503 || (errorData.details && errorData.details.toLowerCase().includes('overloaded'))) {
-            errorMessage = 'Máy chủ Gemini đang quá tải, vui lòng thử lại sau ít phút.';
+          if (response.status === 429) {
+            errorMessage =
+              errorData.message ||
+              `Vui lòng đợi ${errorData.remainingMinutes || 0} phút ${errorData.remainingSeconds || 0} giây trước khi bói lại.`;
+          } else if (
+            response.status === 503 ||
+            (errorData.details && errorData.details.toLowerCase().includes('overloaded'))
+          ) {
+            errorMessage = 'Máy chủ Gemini đang quá tải, vui lòng thử lại sau một chút.';
           } else {
             errorMessage = errorData.details || errorData.error || errorMessage;
-            if (errorData.type) {
-              errorMessage += ` (${errorData.type})`;
-            }
           }
-        } catch (e) {
-          errorMessage = `Lỗi ${analysisResponse.status}: ${errorText.substring(0, 100)}`;
+        } catch (error) {
+          errorMessage = `Lỗi ${response.status}: ${errorText.substring(0, 100)}`;
         }
         throw new Error(errorMessage);
       }
 
-      const contentType = analysisResponse.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await analysisResponse.text();
-        throw new Error('Server trả về dữ liệu không hợp lệ');
-      }
-
-      const data = await analysisResponse.json();
+      const data = await response.json();
       if (data.error) {
         throw new Error(data.error);
       }
       setAnalysis(data.analysis);
-      setCards(threeCards);
 
       setTimeout(() => {
         if (analysisRef.current) {
           analysisRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 150);
+      }, 200);
     } catch (error) {
-      console.error('Error:', error);
+      console.error(error);
       alert('Có lỗi xảy ra: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSuggestedQuestion = (suggestedQ) => {
-    setQuestion(suggestedQ);
-  };
-
   return (
     <>
       <Metadata 
-        title="Bói Tarot - Đặt Câu Hỏi Cho Trải Bài Tarot"
-        description="Đặt câu hỏi và nhận phân tích chi tiết từ các lá bài Tarot. Khám phá quá khứ, hiện tại và tương lai của bạn."
+        title="Bói Tarot - Trải bài tương tác"
+        description="Chọn 3 lá bài Tarot bạn cảm thấy kết nối nhất và nhận thông điệp phân tích từ Tarot Reader."
         image="/tarot.jpeg"
       />
       <div className="min-h-screen bg-[#1a1a1a] flex flex-col">
         <AppNavbar />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 max-w-5xl flex-1">
-        {/* Question Input Section */}
-        <div className="mb-12">
-          <div className="bg-[#111010] border border-[#2a1f17] rounded-[32px] px-5 sm:px-8 py-8 sm:py-10 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
+        <Card className="bg-[#111010] border border-[#2a1f17] rounded-[32px] shadow-[0_25px_80px_rgba(0,0,0,0.45)] mb-10">
+          <CardBody className="p-6 sm:p-10">
             <p className="text-center text-xs md:text-sm tracking-[0.5em] text-[#c08b45] uppercase mb-4">
-              ĐẶT CÂU HỎI
+              Bước 1
             </p>
-            <h1 className="text-2xl sm:text-4xl font-serif text-[#f5f0e5] text-center mb-6 sm:mb-8 ">
-              ĐẶT CÂU HỎI CHO <br/>
-              TRẢI BÀI TAROT
+            <h1 className="text-2xl sm:text-4xl font-serif text-[#f5f0e5] text-center mb-4">
+              Chọn 3 lá bài bạn cảm thấy kết nối nhất
             </h1>
-
-            <div className="mb-8">
-              <div className="relative w-full">
-                <Textarea
-                  placeholder="Khi nào tôi sẽ gặp được tình yêu mới?"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  minRows={1}
-                  maxRows={4}
-                  classNames={{
-                    input: "text-white placeholder:text-[#5f5f60] text-base sm:text-lg pr-16",
-                    innerWrapper: "px-5 sm:px-6 py-4",
-                    inputWrapper: `
-                      bg-[#262626]
-                      rounded-[28px]
-                      border border-[#3a3a3c]
-                      hover:border-[#4a4a4c]
-                      focus-within:border-[#4a4a4c]
-                      shadow-[0_15px_45px_rgba(0,0,0,0.45)]
-                      transition-all
-                    `,
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && question.trim() && !isSubmitting) {
-                      e.preventDefault();
-                      handleReading();
-                    }
-                  }}
-                />
-                <button
-                  onClick={handleReading}
-                  disabled={isSubmitting || !question.trim()}
-                  className={`
-                    absolute top-1/2 right-3 -translate-y-1/2
-                    w-10 h-10 sm:w-12 sm:h-12
-                    flex items-center justify-center
-                    rounded-full
-                    bg-[#353535]
-                    shadow-[0_8px_20px_rgba(0,0,0,0.45)]
-                    transition-all
-                    ${isSubmitting || !question.trim()
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:scale-[1.07]"
-                    }
-                  `}
-                >
-                  <span className="text-white text-base sm:text-lg">↑</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
-              {suggestedQuestions.map((suggestedQ, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSuggestedQuestion(suggestedQ)}
-                  disabled={isSubmitting}
-                  className={`bg-[#1b1b1d] border border-[#2f2f32] text-white text-left px-5 sm:px-6 py-4 sm:py-5 rounded-[18px] sm:rounded-[20px] transition-all duration-200 text-sm sm:text-base md:text-lg shadow-[0_12px_30px_rgba(0,0,0,0.35)] ${
-                    isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#262628] hover:border-[#c08b45]/50'
-                  }`}
-                >
-                  {suggestedQ}
-                </button>
-              ))}
-            </div>
-
-            <p className="text-center text-[#c08b45] text-sm uppercase tracking-[0.3em]">
-              Nhấn gửi câu hỏi để bắt đầu xào bài
+            <p className="text-white/70 text-center max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+              Hãy hít thở sâu, tập trung vào trực giác và chọn lần lượt từng lá. Khi đủ 3 lá, chúng tôi sẽ
+              giải nghĩa và gửi bạn thông điệp dành riêng cho hành trình hiện tại.
             </p>
-          </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        {/* Cards Display */}
-        {analysis && cards.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-3xl font-serif text-[#D4AF37] mb-8 text-center">
-              Ba Lá Bài Của Bạn
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {cards.map((card, index) => {
-                const positions = ['Quá Khứ', 'Hiện Tại', 'Tương Lai'];
+        <div className="mb-12">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <p className="text-white/80 text-sm sm:text-base">
+              Đã chọn <span className="text-[#c08b45] font-semibold">{selectedCards.length}/3</span> lá
+            </p>
+            <Button
+              size="sm"
+              className="bg-transparent border border-[#2a2a2a] text-white hover:border-[#c08b45]"
+              onClick={resetSpread}
+              disabled={isSubmitting || isLoadingCards}
+            >
+              Trải bài mới
+            </Button>
+          </div>
+
+          {isLoadingCards ? (
+            <div className="py-20 flex justify-center">
+              <Spinner size="lg" className="text-[#D4AF37]" />
+            </div>
+          ) : (
+            <div className="tarot-row flex gap-4 overflow-x-auto pb-4">
+              {deck.map((card, index) => {
+                const flipped = revealedIndices.includes(index);
+                const disabled = flipped || selectedCards.length >= 3 || isSubmitting;
                 return (
-                  <div key={index} className="relative">
-                    <div 
-                      className="relative overflow-hidden rounded-lg cursor-pointer transition-all duration-300 hover:scale-105 shadow-2xl"
-                      onMouseEnter={() => setHoveredCard(index)}
-                      onMouseLeave={() => setHoveredCard(null)}
-                    >
-                      <img
-                        src={card.image}
-                        alt={card.name}
-                        className="w-full h-[500px] object-cover"
-                      />
-                      {hoveredCard === index && (
-                        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300">
-                          <div className="text-center p-6">
-                            <h3 className="text-3xl font-bold text-[#D4AF37] mb-2">{card.name}</h3>
-                            <p className="text-white/90 text-lg font-semibold">{positions[index]}</p>
-                          </div>
-                        </div>
-                      )}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                        <p className="text-white text-center font-semibold text-lg">
-                          {positions[index]}
-                        </p>
+                  <button
+                    key={`${card.name}-${index}`}
+                    className={`tarot-card relative flex-shrink-0 ${flipped ? 'is-flipped' : ''} ${disabled ? 'disabled-card' : ''}`}
+                    style={{ aspectRatio: '3 / 5', width: '110px', animationDelay: `${index * 60}ms` }}
+                    onClick={() => handleCardSelect(index)}
+                    disabled={disabled}
+                  >
+                    <div className="card-inner">
+                      <div className="card-face card-back">
+                        <img src="/image/backside.png" alt="Mặt sau lá bài" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="card-face card-front">
+                        <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
+            </div>
+          )}
+        </div>
+
+        {selectedCards.length > 0 && (
+          <div className="mb-10 bg-[#1b1b1d] border border-[#2f2f32] rounded-2xl p-6">
+            <h2 className="text-center text-[#c08b45] uppercase tracking-[0.3em] text-sm mb-4">
+              Lá bài đã chọn
+            </h2>
+            <div className="flex flex-wrap justify-center gap-4">
+              {selectedCards.map((card, index) => (
+                <div key={`${card.name}-selected-${index}`} className="w-28 sm:w-32">
+                  <div className="overflow-hidden rounded-xl border border-[#2f2f32] shadow-[0_15px_45px_rgba(0,0,0,0.45)] mb-2">
+                    <img src={card.image} alt={card.name} className="w-full h-40 object-cover" />
+                  </div>
+                    <p className="text-center text-white text-sm font-semibold">{card.name}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Analysis Section */}
         {isSubmitting && (
-          <div className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-12">
-            <div className="flex flex-col items-center justify-center">
+          <div className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-12 mb-10">
+            <div className="flex flex-col items-center justify-center gap-4">
               <Spinner size="lg" className="text-[#D4AF37]" />
-              <p className="text-white/80 mt-6 text-lg">Đang rút bài và phân tích...</p>
+              <p className="text-white/80 text-center text-lg">Đang lắng nghe thông điệp từ vũ trụ...</p>
             </div>
           </div>
         )}
 
         {analysis && (
-          <div ref={analysisRef} className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-6 sm:p-8 mb-8">
-            <h2 className="text-3xl font-serif text-[#D4AF37] mb-6">
-              Phân Tích Tarot
+          <div 
+            ref={analysisRef}
+            className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-6 sm:p-8 mb-8"
+          >
+            <h2 className="text-3xl font-serif text-[#D4AF37] mb-6 text-center">
+              Thông điệp Tarot
             </h2>
             <div 
               className="text-white/90 leading-relaxed markdown-content"
               style={{ 
-                fontSize: '1.1rem',
-                lineHeight: '2'
+                fontSize: '1.05rem',
+                lineHeight: '1.9'
               }}
             >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-[#D4AF37] mt-6 mb-4" {...props} />,
+                  h1: ({node, ...props}) => <h1 className="text-2xl font-bold text-[#D4AF37] mt-6 mb-4 text-center" {...props} />,
                   h2: ({node, ...props}) => <h2 className="text-xl font-bold text-[#D4AF37] mt-5 mb-3" {...props} />,
                   h3: ({node, ...props}) => <h3 className="text-lg font-bold text-[#D4AF37] mt-4 mb-2" {...props} />,
                   p: ({node, ...props}) => <p className="mb-4" {...props} />,
