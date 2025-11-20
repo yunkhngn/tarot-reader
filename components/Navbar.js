@@ -40,7 +40,7 @@ export default function AppNavbar() {
   return (
     <>
       <Navbar 
-        className="bg-[#0b0a0a] border-b border-[#2a1f17] px-4 md:px-6"
+        className="bg-[#0b0a0a] border-b border-[#2a1f17] p-5"
         maxWidth="full"
       >
         <NavbarBrand>

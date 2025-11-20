@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { Button } from '@heroui/react';
 import AppNavbar from '../components/Navbar';
 import Metadata from '../components/Metadata';
-import Footer from '../components/Footer';
 
 export default function Home() {
   const router = useRouter();
@@ -32,7 +31,7 @@ export default function Home() {
               </p>
               
               <Button
-                className="bg-white text-black hover:bg-gray-200 font-semibold px-8 py-5 text-base sm:text-lg rounded-none"
+                className="bg-white text-black hover:bg-gray-200 font-semibold text-base sm:text-lg rounded-none"
                 onClick={() => router.push('/reading')}
               >
                 <span className="nav-star mr-2">✦</span>
@@ -62,7 +61,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     </>
   );

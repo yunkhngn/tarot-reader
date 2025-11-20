@@ -69,9 +69,32 @@ export default function Library() {
             className="w-full max-w-2xl mx-auto"
             classNames={{
               input: "text-white placeholder:text-gray-400 text-base sm:text-lg",
-              inputWrapper: "bg-[#1a1a1a] border border-gray-700 hover:border-[#D4AF37]/50 focus-within:border-[#D4AF37] px-4 py-2"
+
+              // Lớp trong, nơi HeroUI hay tự đổi màu -> khoá luôn lại
+              innerWrapper: `
+                bg-[#1a1a1a]
+                data-[hover=true]:bg-[#1a1a1a]
+                data-[focus=true]:bg-[#1a1a1a]
+                group-data-[focus=true]:bg-[#1a1a1a]
+                px-4 py-3
+              `,
+
+              // Lớp ngoài – border và nền tổng
+              inputWrapper: `
+                bg-[#1a1a1a]
+                border border-gray-700
+                hover:border-[#D4AF37]/50
+                focus-within:border-[#D4AF37]
+                data-[hover=true]:bg-[#1a1a1a]
+                data-[focus=true]:bg-[#1a1a1a]
+                group-data-[focus=true]:bg-[#1a1a1a]
+                focus-within:ring-0
+                outline-none
+                rounded-xl
+              `,
             }}
           />
+
         </div>
 
         {loading ? (

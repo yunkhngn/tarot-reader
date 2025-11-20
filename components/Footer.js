@@ -1,15 +1,14 @@
+import { useRouter } from 'next/router';
+
 export default function Footer() {
   const links = [
     { label: 'Bói bài tarot', href: '/reading' },
     { label: 'Library bài', href: '/library' },
-    { label: 'Blogs', href: '#' },
-    { label: 'Về chúng tôi', href: '#' },
-    { label: 'Shop', href: '#' },
-    { label: 'Hỗ trợ', href: '#' },
   ];
+  const router = useRouter();
 
   return (
-    <footer className="bg-[#0b0a0a] border-t border-[#2a1f17] mt-16">
+    <footer className="bg-[#0b0a0a] border-t border-[#2a1f17]">
       <div className="container mx-auto px-4 py-10 md:py-12 max-w-6xl">
         <div className="flex flex-col md:flex-row justify-between gap-8">
           <div>
@@ -24,13 +23,14 @@ export default function Footer() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm md:text-base font-mulish">
             {links.map((link) => (
-              <a
+              <p
                 key={link.label}
                 href={link.href}
                 className="text-white/70 hover:text-white uppercase tracking-[0.2em]"
+                onClick={() => router.push(link.href)}
               >
                 {link.label}
-              </a>
+              </p>
             ))}
           </div>
         </div>

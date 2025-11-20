@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardBody, Button, Spinner } from '@heroui/react';
+import { Card, CardBody, Button, Spinner, Textarea } from '@heroui/react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import AppNavbar from '../components/Navbar';
 import Metadata from '../components/Metadata';
 
-const DEFAULT_PROMPT =
-  'Bạn là một reader Tarot chuyên nghiệp. Dựa trên 3 lá bài bên dưới, hãy đưa ra thông điệp chung, phân tích ngắn gọn (quá khứ - hiện tại - tương lai) và lời khuyên dành cho người xem. Trình bày bằng markdown.';
 const DISPLAY_CARD_COUNT = 12;
+
+const suggestedQuestions = [
+  "Mối quan hệ mới này có phải là True Love của tôi không?",
+  "Người ấy có hối tiếc về việc chia tay không?",
+  "Tôi sẽ gặp những cơ hội quan trọng nào trong tương lai gần?",
+  "Tôi nên tiếp tục công việc hiện tại hay tìm kiếm một hướng đi mới?"
+];
 
 const shuffle = (array) => {
   const cloned = [...array];
@@ -23,10 +28,13 @@ export default function Reading() {
   const [deck, setDeck] = useState([]);
   const [selectedCards, setSelectedCards] = useState([]);
   const [revealedIndices, setRevealedIndices] = useState([]);
+  const [question, setQuestion] = useState('');
   const [analysis, setAnalysis] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingCards, setIsLoadingCards] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
   const analysisRef = useRef(null);
+  const rowRef = useRef(null);
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -50,6 +58,7 @@ export default function Reading() {
     setDeck(shuffle(allCards).slice(0, DISPLAY_CARD_COUNT));
     setSelectedCards([]);
     setRevealedIndices([]);
+    setQuestion('');
     setAnalysis('');
   };
 
@@ -62,10 +71,116 @@ export default function Reading() {
     const updatedSelected = [...selectedCards, deck[index]];
     setRevealedIndices(updatedRevealed);
     setSelectedCards(updatedSelected);
+  };
 
-    if (updatedSelected.length === 3) {
-      analyzeCards(updatedSelected);
+  // Drag to scroll functionality
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let hasMoved = false;
+
+    const handleMouseDown = (e) => {
+      // Only start drag if clicking on the row itself, not on a card button
+      if (e.target === row || (e.target.closest('.tarot-row') === row && !e.target.closest('button'))) {
+        isDown = true;
+        hasMoved = false;
+        setIsDragging(false);
+        startX = e.pageX - row.offsetLeft;
+        scrollLeft = row.scrollLeft;
+        row.style.cursor = 'grabbing';
+      }
+    };
+
+    const handleMouseLeave = () => {
+      isDown = false;
+      hasMoved = false;
+      row.style.cursor = 'grab';
+    };
+
+    const handleMouseUp = () => {
+      isDown = false;
+      row.style.cursor = 'grab';
+      setTimeout(() => {
+        setIsDragging(false);
+        hasMoved = false;
+      }, 100);
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isDown) return;
+      const x = e.pageX - row.offsetLeft;
+      const diff = Math.abs(x - startX);
+      
+      if (diff > 5) {
+        hasMoved = true;
+        setIsDragging(true);
+        e.preventDefault();
+        const walk = (x - startX) * 2;
+        row.scrollLeft = scrollLeft - walk;
+      }
+    };
+
+    row.addEventListener('mousedown', handleMouseDown);
+    row.addEventListener('mouseleave', handleMouseLeave);
+    row.addEventListener('mouseup', handleMouseUp);
+    row.addEventListener('mousemove', handleMouseMove);
+
+    // Touch events for mobile
+    let touchStart = 0;
+    let scrollLeftStart = 0;
+
+    const handleTouchStart = (e) => {
+      touchStart = e.touches[0].pageX;
+      scrollLeftStart = row.scrollLeft;
+      setIsDragging(false);
+    };
+
+    const handleTouchMove = (e) => {
+      if (!touchStart) return;
+      const touchNow = e.touches[0].pageX;
+      const walk = (touchStart - touchNow) * 2;
+      row.scrollLeft = scrollLeftStart + walk;
+      setIsDragging(true);
+    };
+
+    const handleTouchEnd = () => {
+      touchStart = 0;
+      setTimeout(() => setIsDragging(false), 100);
+    };
+
+    row.addEventListener('touchstart', handleTouchStart);
+    row.addEventListener('touchmove', handleTouchMove);
+    row.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      row.removeEventListener('mousedown', handleMouseDown);
+      row.removeEventListener('mouseleave', handleMouseLeave);
+      row.removeEventListener('mouseup', handleMouseUp);
+      row.removeEventListener('mousemove', handleMouseMove);
+      row.removeEventListener('touchstart', handleTouchStart);
+      row.removeEventListener('touchmove', handleTouchMove);
+      row.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [deck]);
+
+  const handleAnalyze = () => {
+    if (!question.trim()) {
+      alert('Vui lòng nhập câu hỏi của bạn');
+      return;
     }
+    if (selectedCards.length !== 3) {
+      alert('Vui lòng chọn đủ 3 lá bài');
+      return;
+    }
+    analyzeCards(selectedCards);
+  };
+
+  const handleSuggestedQuestion = (suggestedQ) => {
+    setQuestion(suggestedQ);
   };
 
   const analyzeCards = async (cardsToAnalyze) => {
@@ -78,7 +193,7 @@ export default function Reading() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          question: DEFAULT_PROMPT,
+          question: question.trim() || 'Hãy phân tích 3 lá bài Tarot này cho tôi.',
           cards: cardsToAnalyze,
         }),
       });
@@ -136,17 +251,127 @@ export default function Reading() {
         <AppNavbar />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 max-w-5xl flex-1">
+        {/* Question Input Section */}
+        <div className="mb-12">
+          <div className="bg-[#111010] border border-[#2a1f17] rounded-[32px] px-5 sm:px-8 py-8 sm:py-10 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
+            <p className="text-center text-xs md:text-sm tracking-[0.5em] text-[#c08b45] uppercase mb-4">
+              ĐẶT CÂU HỎI
+            </p>
+            <h1 className="text-2xl sm:text-4xl font-serif text-[#f5f0e5] text-center mb-6 sm:mb-8">
+              ĐẶT CÂU HỎI CHO <br/>
+              TRẢI BÀI TAROT
+            </h1>
+
+            <div className="mb-8">
+              <div className="relative w-full">
+              <Textarea
+  placeholder="Khi nào tôi sẽ gặp được tình yêu mới?"
+  value={question}
+  onChange={(e) => setQuestion(e.target.value)}
+  minRows={1}
+  maxRows={4}
+  spellCheck={false}
+  autoCorrect="off"
+  autoComplete="off"
+  classNames={{
+    input: `
+      text-white
+      !text-white
+      placeholder:text-[#5f5f60]
+      text-base sm:text-lg
+      !pr-14 sm:!pr-16
+      [-webkit-text-fill-color:rgba(255,255,255,0.96)]
+    `,
+    innerWrapper: `
+      !px-5 sm:!px-6 
+      !py-4 sm:!py-5
+      bg-[#262626]
+      data-[hover=true]:bg-[#262626]
+      data-[focus=true]:bg-[#262626]
+      group-data-[focus=true]:bg-[#262626]
+    `,
+    inputWrapper: `
+      bg-[#262626]
+      data-[hover=true]:bg-[#262626]
+      data-[focus=true]:bg-[#262626]
+      group-data-[focus=true]:bg-[#262626]
+      rounded-[28px]
+      border border-[#3a3a3c]
+      hover:border-[#4a4a4c]
+      focus-within:border-[#4a4a4c]
+      shadow-[0_15px_45px_rgba(0,0,0,0.45)]
+      transition-all
+      !min-h-[64px]
+    `,
+  }}
+  onKeyDown={(e) => {
+    if (
+      e.key === 'Enter' &&
+      !e.shiftKey &&
+      question.trim() &&
+      selectedCards.length === 3 &&
+      !isSubmitting
+    ) {
+      e.preventDefault();
+      handleAnalyze();
+    }
+  }}
+/>
+                <button
+                  onClick={handleAnalyze}
+                  disabled={isSubmitting || !question.trim() || selectedCards.length !== 3}
+                  className={`
+                    absolute top-1/2 right-4 sm:right-5 -translate-y-1/2
+                    w-10 h-10 sm:w-12 sm:h-12
+                    flex items-center justify-center
+                    rounded-full
+                    bg-[#353535]
+                    shadow-[0_8px_20px_rgba(0,0,0,0.45)]
+                    transition-all
+                    z-10
+                    ${isSubmitting || !question.trim() || selectedCards.length !== 3
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:scale-[1.07]"
+                    }
+                  `}
+                >
+                  <span className="text-white text-base sm:text-lg">↑</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
+              {suggestedQuestions.map((suggestedQ, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestedQuestion(suggestedQ)}
+                  disabled={isSubmitting}
+                  className={`bg-[#1b1b1d] border border-[#2f2f32] text-white text-left px-5 sm:px-6 py-4 sm:py-5 rounded-[18px] sm:rounded-[20px] transition-all duration-200 text-sm sm:text-base md:text-lg shadow-[0_12px_30px_rgba(0,0,0,0.35)] ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#262628] hover:border-[#c08b45]/50'
+                  }`}
+                >
+                  {suggestedQ}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-center text-[#c08b45] text-sm uppercase tracking-[0.3em]">
+              Nhập câu hỏi và chọn 3 lá bài để bắt đầu
+            </p>
+          </div>
+        </div>
+
+        {/* Card Selection Section */}
         <Card className="bg-[#111010] border border-[#2a1f17] rounded-[32px] shadow-[0_25px_80px_rgba(0,0,0,0.45)] mb-10">
           <CardBody className="p-6 sm:p-10">
             <p className="text-center text-xs md:text-sm tracking-[0.5em] text-[#c08b45] uppercase mb-4">
-              Bước 1
+              Bước 2
             </p>
             <h1 className="text-2xl sm:text-4xl font-serif text-[#f5f0e5] text-center mb-4">
               Chọn 3 lá bài bạn cảm thấy kết nối nhất
             </h1>
             <p className="text-white/70 text-center max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-              Hãy hít thở sâu, tập trung vào trực giác và chọn lần lượt từng lá. Khi đủ 3 lá, chúng tôi sẽ
-              giải nghĩa và gửi bạn thông điệp dành riêng cho hành trình hiện tại.
+              Kéo thả để xem các lá bài, sau đó click vào 3 lá bạn muốn chọn. Hãy hít thở sâu và lắng nghe trực giác của bạn.
             </p>
           </CardBody>
         </Card>
@@ -171,7 +396,11 @@ export default function Reading() {
               <Spinner size="lg" className="text-[#D4AF37]" />
             </div>
           ) : (
-            <div className="tarot-row flex gap-4 overflow-x-auto pb-4">
+            <div 
+              ref={rowRef}
+              className="tarot-row flex gap-4 overflow-x-auto pb-4 cursor-grab select-none"
+              style={{ userSelect: 'none' }}
+            >
               {deck.map((card, index) => {
                 const flipped = revealedIndices.includes(index);
                 const disabled = flipped || selectedCards.length >= 3 || isSubmitting;
@@ -179,8 +408,19 @@ export default function Reading() {
                   <button
                     key={`${card.name}-${index}`}
                     className={`tarot-card relative flex-shrink-0 ${flipped ? 'is-flipped' : ''} ${disabled ? 'disabled-card' : ''}`}
-                    style={{ aspectRatio: '3 / 5', width: '110px', animationDelay: `${index * 60}ms` }}
-                    onClick={() => handleCardSelect(index)}
+                    style={{ aspectRatio: '3 / 5', width: '110px', animationDelay: `${index * 60}ms`, pointerEvents: disabled ? 'none' : 'auto' }}
+                    draggable="false"
+                    onDragStart={(e) => {
+                      e.preventDefault();
+                      return false;
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCardSelect(index);
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
                     disabled={disabled}
                   >
                     <div className="card-inner">
@@ -188,7 +428,9 @@ export default function Reading() {
                         <img src="/image/backside.png" alt="Mặt sau lá bài" className="w-full h-full object-cover" />
                       </div>
                       <div className="card-face card-front">
-                        <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
+                        <img src={card.image} alt={card.name} className="w-full h-full object-cover
+                        
+                        " />
                       </div>
                     </div>
                   </button>

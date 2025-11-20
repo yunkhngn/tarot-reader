@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../tailwind.config.js"; /* hoặc .js tuỳ file của mày */
 
 :root {
   --heroui-background: 0 0% 4%;
@@ -27,16 +28,6 @@ a {
 
 .font-mulish {
   font-family: var(--font-mulish), 'Mulish', sans-serif;
-}
-
-input:focus,
-input:focus-visible,
-textarea:focus,
-textarea:focus-visible,
-button:focus,
-button:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
 }
 
 .navbar-link {
@@ -70,6 +61,22 @@ button:focus-visible {
 .tarot-row {
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+.tarot-row:active {
+  cursor: grabbing;
+}
+
+.tarot-row * {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .tarot-row::-webkit-scrollbar {
@@ -149,15 +156,6 @@ button:focus-visible {
     opacity: 1;
     transform: translateY(0) rotateZ(0);
   }
-}
-
-input:focus,
-textarea:focus,
-select:focus,
-button:focus,
-[role="button"]:focus {
-  outline: none;
-  box-shadow: none;
 }
 
 .heroui-input-wrapper:focus-within,
