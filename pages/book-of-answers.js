@@ -7,7 +7,7 @@ import AppNavbar from '../components/Navbar';
 import Metadata from '../components/Metadata';
 
 export default function BookOfAnswers() {
-  const [state, setState] = useState('GUIDE'); // GUIDE, IDLE, READY, ANALYZING, OPENING, REVEALED
+  const [state, setState] = useState('GUIDE'); 
   const [answer, setAnswer] = useState('');
   const [showGuide, setShowGuide] = useState(true);
 
@@ -57,7 +57,7 @@ export default function BookOfAnswers() {
   return (
     <>
       <Metadata 
-        title="Sách Vị Thần - Book of Answers"
+        title="Sách Vị Thần Của Những Quyết Định - Book of Answers"
         description="Đặt câu hỏi và nhận câu trả lời từ cuốn sách của định mệnh."
         image="/tarot.jpeg"
       />

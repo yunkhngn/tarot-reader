@@ -94,6 +94,19 @@ export default function ApiDocs() {
                 </p>
               </div>
             </div>
+            <div className="bg-[#111010] border border-[#2a1f17] rounded-2xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <code className="bg-[#2a2a2a] px-4 py-2.5 rounded-lg border border-[#D4AF37]/30 text-[#D4AF37] font-mono text-sm sm:text-base whitespace-nowrap w-fit">
+                    GET /api/book-of-answers
+                  </code>
+                  <span className="text-white/90 text-base sm:text-lg font-medium">Get Book of Answers response</span>
+                </div>
+                <p className="text-white/70 text-sm sm:text-base leading-relaxed">
+                  Trả về một câu trả lời ngẫu nhiên từ cuốn sách "Vị Thần Của Những Quyết Định".
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="mt-12 bg-[#111010] border border-[#2a1f17] rounded-2xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
@@ -141,6 +154,17 @@ export default function ApiDocs() {
   "category": "life",
   "id": 1,
   "date": "2025-01-21"
+}`}
+              </pre>
+            </div>
+
+            <div>
+              <p className="text-white/70 text-sm sm:text-base mb-3">
+                <strong className="text-[#D4AF37]">GET /api/book-of-answers</strong> trả về:
+              </p>
+              <pre className="bg-[#2a2a2a] border border-gray-700 rounded-lg p-4 overflow-x-auto text-sm text-white/80">
+{`{
+  "answer": "Hãy làm ngay đi"
 }`}
               </pre>
             </div>
