@@ -25,7 +25,7 @@
     "@heroui/react": "^2.2.9",
     "@heroui/theme": "^2.2.9",
     "framer-motion": "^12.23.24",
-    "next": "^16.0.7",
+    "next": "16.0.10",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
