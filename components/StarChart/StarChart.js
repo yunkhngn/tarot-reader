@@ -1,12 +1,11 @@
 /**
  * StarChart Component
- * Professional natal chart with enhanced visuals
+ * Beautiful natal chart with refined visuals
  */
 
 import { useMemo, useRef, useImperativeHandle, forwardRef } from 'react';
 import {
   ZODIAC_SIGNS,
-  normalizeAngle,
   formatZodiacPosition,
   getZodiacSign,
   getSignDegree,
@@ -14,43 +13,41 @@ import {
 
 // Chart dimensions
 const WIDTH = 1100;
-const HEIGHT = 700;
-const CHART_CENTER_X = 320;
-const CHART_CENTER_Y = 350;
-const OUTER_RADIUS = 260;
-const ZODIAC_RING_WIDTH = 45;
-const DEGREE_RING_WIDTH = 18;
-const HOUSE_RING_WIDTH = 25;
+const HEIGHT = 750;
+const CHART_CENTER_X = 340;
+const CHART_CENTER_Y = 375;
+const OUTER_RADIUS = 280;
+const ZODIAC_RING_WIDTH = 48;
+const DEGREE_RING_WIDTH = 20;
+const HOUSE_RING_WIDTH = 28;
 const INNER_RADIUS = OUTER_RADIUS - ZODIAC_RING_WIDTH - DEGREE_RING_WIDTH - HOUSE_RING_WIDTH;
-const PLANET_RADIUS = INNER_RADIUS - 40;
+const PLANET_RADIUS = INNER_RADIUS - 45;
 
-// Colors
+// Refined color palette
 const COLORS = {
-  background: '#ffffff',
-  zodiacOuter: '#6b8cbe',
-  zodiacInner: '#8fafd4',
-  degreeRing: '#a8c4e0',
-  zodiacBorder: '#4a6fa5',
-  houseArea: '#f5f7fa',
-  houseBorder: '#c8d4e3',
+  background: '#fafbfc',
+  accent: '#6b8cbe',
+  accentLight: '#a8c4e8',
+  accentDark: '#4a6a9a',
+  gold: '#c9a227',
   text: '#2c3e50',
-  textLight: '#7f8c8d',
-  signBox: '#9b59b6',
-  signBoxBorder: '#8e44ad',
-  aspects: {
-    conjunction: '#e74c3c',
-    opposition: '#c0392b',
-    trine: '#3498db',
-    square: '#9b59b6',
-    sextile: '#27ae60',
-  },
+  textMuted: '#7f8c8d',
+  white: '#ffffff',
+  signBox: '#8b6bb5',
+  signBoxLight: '#a888cf',
 };
 
-const SIGN_ELEMENTS = [
-  'fire', 'earth', 'air', 'water',
-  'fire', 'earth', 'air', 'water',
-  'fire', 'earth', 'air', 'water',
-];
+// Aspect colors
+const ASPECT_COLORS = {
+  conjunction: '#e74c3c',
+  opposition: '#c0392b',
+  trine: '#2980b9',
+  square: '#8e44ad',
+  sextile: '#27ae60',
+};
+
+// Element zodiac mapping
+const SIGN_ELEMENTS = ['fire', 'earth', 'air', 'water', 'fire', 'earth', 'air', 'water', 'fire', 'earth', 'air', 'water'];
 
 function calculateAspects(planets) {
   const aspects = [];
@@ -104,7 +101,7 @@ function getPointOnCircle(cx, cy, radius, angle) {
 function formatDate(input) {
   const { year, month, day, hour, minute, utcOffset } = input;
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return `${months[month - 1]} ${day}, ${year} at ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} GMT${utcOffset >= 0 ? '+' : ''}${utcOffset}`;
+  return `${months[month - 1]} ${day}, ${year} • ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} GMT${utcOffset >= 0 ? '+' : ''}${utcOffset}`;
 }
 
 const StarChart = forwardRef(function StarChart({ chartData }, ref) {
@@ -153,14 +150,13 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
   }, [planets, asc]);
   
   const mcAngle = -(mc - asc + 180);
-  const ascAngle = 180;
   
   // Generate degree tick marks
   const degreeMarks = useMemo(() => {
     const marks = [];
     for (let i = 0; i < 360; i += 5) {
       const angle = -(i - asc + 180);
-      const isMajor = i % 30 === 0;
+      const isMajor = i % 10 === 0;
       const innerR = OUTER_RADIUS - ZODIAC_RING_WIDTH - (isMajor ? DEGREE_RING_WIDTH : DEGREE_RING_WIDTH * 0.5);
       const outerR = OUTER_RADIUS - ZODIAC_RING_WIDTH;
       marks.push({ angle, isMajor, ...radialLine(CHART_CENTER_X, CHART_CENTER_Y, innerR, outerR, angle) });
@@ -178,54 +174,82 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
       style={{ maxWidth: '100%', height: 'auto' }}
     >
       <defs>
-        <linearGradient id="zodiacGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#7b9fcf" />
-          <stop offset="50%" stopColor="#5a82b3" />
-          <stop offset="100%" stopColor="#7b9fcf" />
+        {/* Main gradient for zodiac ring */}
+        <radialGradient id="zodiacRingGradient" cx="50%" cy="50%" r="50%">
+          <stop offset="70%" stopColor={COLORS.accent} />
+          <stop offset="100%" stopColor={COLORS.accentDark} />
+        </radialGradient>
+        
+        {/* Inner ring gradient */}
+        <radialGradient id="innerRingGradient" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={COLORS.accentLight} />
+          <stop offset="100%" stopColor={COLORS.accent} />
+        </radialGradient>
+        
+        {/* Center gradient */}
+        <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#f8fafd" />
+          <stop offset="100%" stopColor="#e8f0f8" />
+        </radialGradient>
+        
+        {/* Sign box gradient */}
+        <linearGradient id="signBoxGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={COLORS.signBoxLight} />
+          <stop offset="100%" stopColor={COLORS.signBox} />
         </linearGradient>
-        <linearGradient id="innerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#f8fafc" />
-          <stop offset="100%" stopColor="#e8eff7" />
-        </linearGradient>
-        <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="0" dy="3" stdDeviation="6" floodOpacity="0.2"/>
+        
+        {/* Drop shadow */}
+        <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.15"/>
         </filter>
-        <filter id="innerShadow">
-          <feOffset dx="0" dy="2"/>
-          <feGaussianBlur stdDeviation="3" result="blur"/>
-          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        
+        {/* Glow effect for planets */}
+        <filter id="planetGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
         </filter>
       </defs>
       
       {/* Background */}
       <rect x="0" y="0" width={WIDTH} height={HEIGHT} fill={COLORS.background} />
       
+      {/* Decorative corner elements */}
+      <g opacity="0.1">
+        <circle cx="50" cy="50" r="30" fill="none" stroke={COLORS.accent} strokeWidth="1"/>
+        <circle cx={WIDTH - 50} cy="50" r="30" fill="none" stroke={COLORS.accent} strokeWidth="1"/>
+        <circle cx="50" cy={HEIGHT - 50} r="30" fill="none" stroke={COLORS.accent} strokeWidth="1"/>
+        <circle cx={WIDTH - 50} cy={HEIGHT - 50} r="30" fill="none" stroke={COLORS.accent} strokeWidth="1"/>
+      </g>
+      
       {/* Header */}
       <g>
-        <text x="35" y="40" fill={COLORS.text} fontSize="20" fontWeight="bold" fontFamily="Georgia, serif">
+        <text x="40" y="45" fill={COLORS.text} fontSize="22" fontWeight="600" fontFamily="Georgia, serif">
           Natal Chart
         </text>
-        <text x="35" y="62" fill={COLORS.textLight} fontSize="13" fontFamily="Arial, sans-serif">
-          {input.name || 'Birth Chart'} | Placidus House System
+        <text x="40" y="70" fill={COLORS.textMuted} fontSize="13" fontFamily="Arial, sans-serif">
+          {input.name || 'Birth Chart'} • Placidus House System
         </text>
-        <text x="35" y="82" fill={COLORS.textLight} fontSize="12" fontFamily="Arial, sans-serif">
+        <text x="40" y="90" fill={COLORS.textMuted} fontSize="12" fontFamily="Arial, sans-serif">
           {formatDate(input)}
         </text>
-        <text x="35" y="100" fill={COLORS.textLight} fontSize="12" fontFamily="Arial, sans-serif">
+        <text x="40" y="110" fill={COLORS.textMuted} fontSize="12" fontFamily="Arial, sans-serif">
           {input.location || `${Math.abs(input.latitude || latitude).toFixed(2)}°${(input.latitude || latitude) >= 0 ? 'N' : 'S'}, ${Math.abs(input.longitude || longitude).toFixed(2)}°${(input.longitude || longitude) >= 0 ? 'E' : 'W'}`}
         </text>
       </g>
       
       {/* Main Chart Circle */}
-      <g filter="url(#shadow)">
+      <g filter="url(#dropShadow)">
         {/* Outer zodiac ring */}
         <circle
           cx={CHART_CENTER_X}
           cy={CHART_CENTER_Y}
           r={OUTER_RADIUS}
-          fill="url(#zodiacGrad)"
-          stroke={COLORS.zodiacBorder}
-          strokeWidth="3"
+          fill="url(#zodiacRingGradient)"
+          stroke={COLORS.accentDark}
+          strokeWidth="2"
         />
         
         {/* Degree ring */}
@@ -233,8 +257,8 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
           cx={CHART_CENTER_X}
           cy={CHART_CENTER_Y}
           r={OUTER_RADIUS - ZODIAC_RING_WIDTH}
-          fill={COLORS.degreeRing}
-          stroke={COLORS.zodiacBorder}
+          fill={COLORS.accentLight}
+          stroke={COLORS.accent}
           strokeWidth="1"
         />
         
@@ -243,8 +267,8 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
           cx={CHART_CENTER_X}
           cy={CHART_CENTER_Y}
           r={OUTER_RADIUS - ZODIAC_RING_WIDTH - DEGREE_RING_WIDTH}
-          fill={COLORS.zodiacInner}
-          stroke={COLORS.zodiacBorder}
+          fill="url(#innerRingGradient)"
+          stroke={COLORS.accent}
           strokeWidth="1"
         />
         
@@ -253,8 +277,8 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
           cx={CHART_CENTER_X}
           cy={CHART_CENTER_Y}
           r={INNER_RADIUS}
-          fill="url(#innerGrad)"
-          stroke={COLORS.houseBorder}
+          fill="url(#centerGradient)"
+          stroke={COLORS.accentLight}
           strokeWidth="1"
         />
       </g>
@@ -265,15 +289,17 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
           key={`tick-${i}`}
           x1={mark.x1} y1={mark.y1}
           x2={mark.x2} y2={mark.y2}
-          stroke={mark.isMajor ? COLORS.zodiacBorder : 'rgba(74, 111, 165, 0.5)'}
-          strokeWidth={mark.isMajor ? 1.5 : 0.5}
+          stroke={mark.isMajor ? 'rgba(74, 106, 154, 0.6)' : 'rgba(74, 106, 154, 0.3)'}
+          strokeWidth={mark.isMajor ? 1 : 0.5}
         />
       ))}
       
-      {/* Zodiac sign boxes */}
+      {/* Zodiac signs - symbols with text presentation */}
       {zodiacSegments.map((sign, i) => {
         const pos = getPointOnCircle(CHART_CENTER_X, CHART_CENTER_Y, OUTER_RADIUS - ZODIAC_RING_WIDTH / 2, sign.midAngle);
-        const boxSize = 28;
+        
+        // Add variation selector U+FE0E to force text presentation
+        const textSymbol = sign.symbol + '\uFE0E';
         
         return (
           <g key={sign.name}>
@@ -289,34 +315,24 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
                 <line
                   x1={line.x1} y1={line.y1}
                   x2={line.x2} y2={line.y2}
-                  stroke="rgba(255,255,255,0.5)"
+                  stroke="rgba(255,255,255,0.4)"
                   strokeWidth="1"
                 />
               );
             })()}
             
-            {/* Sign box */}
-            <rect
-              x={pos.x - boxSize / 2}
-              y={pos.y - boxSize / 2}
-              width={boxSize}
-              height={boxSize}
-              rx="4"
-              fill={COLORS.signBox}
-              stroke={COLORS.signBoxBorder}
-              strokeWidth="1"
-            />
+            {/* Sign symbol as text (not emoji) */}
             <text
               x={pos.x}
               y={pos.y + 1}
-              fill="#ffffff"
-              fontSize="16"
-              fontWeight="bold"
+              fill={COLORS.white}
+              fontSize="22"
+              fontWeight="normal"
               textAnchor="middle"
               dominantBaseline="middle"
-              fontFamily="Georgia, serif"
+              fontFamily="'Segoe UI Symbol', 'DejaVu Sans', Arial, sans-serif"
             >
-              {sign.symbol}
+              {textSymbol}
             </text>
           </g>
         );
@@ -327,7 +343,7 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
         const isAngular = [1, 4, 7, 10].includes(house.houseNum);
         const line = radialLine(
           CHART_CENTER_X, CHART_CENTER_Y,
-          isAngular ? 30 : INNER_RADIUS,
+          isAngular ? 35 : INNER_RADIUS,
           OUTER_RADIUS - ZODIAC_RING_WIDTH - DEGREE_RING_WIDTH,
           house.angle
         );
@@ -337,13 +353,13 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
             key={`house-${house.houseNum}`}
             x1={line.x1} y1={line.y1}
             x2={line.x2} y2={line.y2}
-            stroke={isAngular ? COLORS.text : COLORS.houseBorder}
-            strokeWidth={isAngular ? 2 : 1}
+            stroke={isAngular ? COLORS.text : 'rgba(168, 196, 232, 0.6)'}
+            strokeWidth={isAngular ? 1.5 : 0.75}
           />
         );
       })}
       
-      {/* Aspect lines */}
+      {/* Aspect lines with better curves */}
       {aspects.map((aspect, i) => {
         const p1 = planetPositions.find(p => p.name === aspect.planet1.name);
         const p2 = planetPositions.find(p => p.name === aspect.planet2.name);
@@ -354,22 +370,22 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
             key={`aspect-${i}`}
             x1={p1.x} y1={p1.y}
             x2={p2.x} y2={p2.y}
-            stroke={COLORS.aspects[aspect.type]}
-            strokeWidth="2"
-            opacity="0.7"
+            stroke={ASPECT_COLORS[aspect.type]}
+            strokeWidth="1.5"
+            opacity="0.65"
             strokeLinecap="round"
           />
         );
       })}
       
-      {/* Planets */}
+      {/* Planets with glow effect */}
       {planetPositions.map((planet) => (
-        <g key={planet.name}>
+        <g key={planet.name} filter="url(#planetGlow)">
           <circle
             cx={planet.x}
             cy={planet.y}
-            r="14"
-            fill="#ffffff"
+            r="16"
+            fill={COLORS.white}
             stroke={planet.color}
             strokeWidth="2.5"
           />
@@ -377,7 +393,7 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
             x={planet.x}
             y={planet.y + 1}
             fill={planet.color}
-            fontSize="15"
+            fontSize="16"
             fontWeight="bold"
             textAnchor="middle"
             dominantBaseline="middle"
@@ -388,10 +404,18 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
         </g>
       ))}
       
-      {/* ASC label */}
+      {/* ASC label with decorative line */}
       <g>
+        <line 
+          x1={CHART_CENTER_X - OUTER_RADIUS - 5} 
+          y1={CHART_CENTER_Y} 
+          x2={CHART_CENTER_X - OUTER_RADIUS - 25} 
+          y2={CHART_CENTER_Y}
+          stroke={COLORS.text}
+          strokeWidth="1"
+        />
         <text
-          x={CHART_CENTER_X - OUTER_RADIUS - 30}
+          x={CHART_CENTER_X - OUTER_RADIUS - 35}
           y={CHART_CENTER_Y + 5}
           fill={COLORS.text}
           fontSize="14"
@@ -403,81 +427,78 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
         </text>
       </g>
       
-      {/* MC label */}
+      {/* MC label with decorative line */}
       <g>
         {(() => {
-          const pos = getPointOnCircle(CHART_CENTER_X, CHART_CENTER_Y, OUTER_RADIUS + 25, mcAngle);
+          const mcPos = getPointOnCircle(CHART_CENTER_X, CHART_CENTER_Y, OUTER_RADIUS + 5, mcAngle);
+          const mcLabelPos = getPointOnCircle(CHART_CENTER_X, CHART_CENTER_Y, OUTER_RADIUS + 35, mcAngle);
           return (
-            <text
-              x={pos.x}
-              y={pos.y}
-              fill={COLORS.text}
-              fontSize="14"
-              fontWeight="bold"
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontFamily="Arial, sans-serif"
-            >
-              MC
-            </text>
+            <>
+              <line 
+                x1={mcPos.x} y1={mcPos.y}
+                x2={mcLabelPos.x} y2={mcLabelPos.y}
+                stroke={COLORS.text}
+                strokeWidth="1"
+              />
+              <text
+                x={mcLabelPos.x}
+                y={mcLabelPos.y + 20}
+                fill={COLORS.text}
+                fontSize="14"
+                fontWeight="bold"
+                textAnchor="middle"
+                fontFamily="Arial, sans-serif"
+              >
+                MC
+              </text>
+            </>
           );
         })()}
       </g>
       
       {/* Right Panel - Planet Positions */}
-      <g transform="translate(620, 50)">
-        <text fill={COLORS.text} fontSize="16" fontWeight="bold" fontFamily="Georgia, serif">
+      <g transform="translate(680, 60)">
+        <text fill={COLORS.text} fontSize="16" fontWeight="600" fontFamily="Georgia, serif">
           Planet Positions
         </text>
-        <line x1="0" y1="22" x2="200" y2="22" stroke={COLORS.houseBorder} strokeWidth="1" />
+        <line x1="0" y1="24" x2="180" y2="24" stroke={COLORS.accentLight} strokeWidth="2" />
         
         {planetPositions.map((planet, i) => (
-          <g key={planet.name} transform={`translate(0, ${40 + i * 30})`}>
-            <circle cx="10" cy="0" r="10" fill="#fff" stroke={planet.color} strokeWidth="2" />
-            <text x="10" y="1" fill={planet.color} fontSize="12" fontWeight="bold" textAnchor="middle" dominantBaseline="middle" fontFamily="Georgia, serif">
+          <g key={planet.name} transform={`translate(0, ${48 + i * 34})`}>
+            <circle cx="12" cy="0" r="12" fill={COLORS.white} stroke={planet.color} strokeWidth="2" />
+            <text x="12" y="1" fill={planet.color} fontSize="13" fontWeight="bold" textAnchor="middle" dominantBaseline="middle" fontFamily="Georgia, serif">
               {planet.symbol}
             </text>
-            <text x="30" fill={COLORS.text} fontSize="13" fontFamily="Arial, sans-serif" dominantBaseline="middle">
+            <text x="34" fill={COLORS.text} fontSize="13" fontFamily="Arial, sans-serif" dominantBaseline="middle">
               {planet.name}
             </text>
-            <text x="110" fill={COLORS.text} fontSize="13" fontFamily="Arial, sans-serif" dominantBaseline="middle">
+            <text x="110" fill={COLORS.text} fontSize="13" fontWeight="500" fontFamily="Arial, sans-serif" dominantBaseline="middle">
               {planet.degree}° {planet.sign.abbr} {String(planet.arcMinute).padStart(2, '0')}'
             </text>
           </g>
         ))}
         
-        <g transform={`translate(0, ${40 + planetPositions.length * 30 + 20})`}>
-          <line x1="0" y1="-10" x2="200" y2="-10" stroke={COLORS.houseBorder} strokeWidth="1" />
-          <text fill={COLORS.text} fontSize="13" fontWeight="bold" fontFamily="Arial, sans-serif">
-            ASC
-          </text>
-          <text x="50" fill={COLORS.textLight} fontSize="12" fontFamily="Arial, sans-serif">
-            Ascendant
-          </text>
-          <text x="130" fill={COLORS.text} fontSize="13" fontFamily="Arial, sans-serif">
-            {formatZodiacPosition(asc)}
-          </text>
+        {/* ASC/MC */}
+        <g transform={`translate(0, ${48 + planetPositions.length * 34 + 25})`}>
+          <line x1="0" y1="-18" x2="200" y2="-18" stroke={COLORS.accentLight} strokeWidth="1" />
+          <text fill={COLORS.gold} fontSize="13" fontWeight="bold" fontFamily="Arial, sans-serif">ASC</text>
+          <text x="55" fill={COLORS.textMuted} fontSize="12" fontFamily="Arial, sans-serif">Ascendant</text>
+          <text x="150" fill={COLORS.text} fontSize="13" fontFamily="Arial, sans-serif">{formatZodiacPosition(asc)}</text>
         </g>
         
-        <g transform={`translate(0, ${40 + planetPositions.length * 30 + 50})`}>
-          <text fill={COLORS.text} fontSize="13" fontWeight="bold" fontFamily="Arial, sans-serif">
-            MC
-          </text>
-          <text x="50" fill={COLORS.textLight} fontSize="12" fontFamily="Arial, sans-serif">
-            Midheaven
-          </text>
-          <text x="130" fill={COLORS.text} fontSize="13" fontFamily="Arial, sans-serif">
-            {formatZodiacPosition(mc)}
-          </text>
+        <g transform={`translate(0, ${48 + planetPositions.length * 34 + 55})`}>
+          <text fill={COLORS.gold} fontSize="13" fontWeight="bold" fontFamily="Arial, sans-serif">MC</text>
+          <text x="55" fill={COLORS.textMuted} fontSize="12" fontFamily="Arial, sans-serif">Midheaven</text>
+          <text x="150" fill={COLORS.text} fontSize="13" fontFamily="Arial, sans-serif">{formatZodiacPosition(mc)}</text>
         </g>
       </g>
       
       {/* Aspect Legend */}
-      <g transform="translate(880, 50)">
-        <text fill={COLORS.text} fontSize="16" fontWeight="bold" fontFamily="Georgia, serif">
+      <g transform="translate(900, 60)">
+        <text fill={COLORS.text} fontSize="16" fontWeight="600" fontFamily="Georgia, serif">
           Aspects
         </text>
-        <line x1="0" y1="22" x2="150" y2="22" stroke={COLORS.houseBorder} strokeWidth="1" />
+        <line x1="0" y1="24" x2="130" y2="24" stroke={COLORS.accentLight} strokeWidth="2" />
         
         {[
           { name: 'Conjunction', symbol: '☌', type: 'conjunction' },
@@ -486,8 +507,9 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
           { name: 'Square', symbol: '□', type: 'square' },
           { name: 'Sextile', symbol: '⚹', type: 'sextile' },
         ].map((asp, i) => (
-          <g key={asp.type} transform={`translate(0, ${40 + i * 28})`}>
-            <text fill={COLORS.aspects[asp.type]} fontSize="16" fontFamily="Georgia, serif" dominantBaseline="middle">
+          <g key={asp.type} transform={`translate(0, ${48 + i * 30})`}>
+            <circle cx="10" cy="0" r="10" fill={COLORS.white} stroke={ASPECT_COLORS[asp.type]} strokeWidth="2" />
+            <text x="10" y="1" fill={ASPECT_COLORS[asp.type]} fontSize="12" fontWeight="bold" textAnchor="middle" dominantBaseline="middle">
               {asp.symbol}
             </text>
             <text x="30" fill={COLORS.text} fontSize="12" fontFamily="Arial, sans-serif" dominantBaseline="middle">
@@ -498,16 +520,19 @@ const StarChart = forwardRef(function StarChart({ chartData }, ref) {
       </g>
       
       {/* Footer */}
-      <text
-        x={WIDTH - 30}
-        y={HEIGHT - 25}
-        fill={COLORS.textLight}
-        fontSize="11"
-        textAnchor="end"
-        fontFamily="Arial, sans-serif"
-      >
-        tarot.yunkhngn.dev
-      </text>
+      <g>
+        <line x1="40" y1={HEIGHT - 35} x2={WIDTH - 40} y2={HEIGHT - 35} stroke={COLORS.accentLight} strokeWidth="1" opacity="0.5" />
+        <text
+          x={WIDTH / 2}
+          y={HEIGHT - 15}
+          fill={COLORS.textMuted}
+          fontSize="11"
+          textAnchor="middle"
+          fontFamily="Arial, sans-serif"
+        >
+          Generated by tarot.yunkhngn.dev • Placidus House System
+        </text>
+      </g>
     </svg>
   );
 });
