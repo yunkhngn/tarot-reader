@@ -4,6 +4,7 @@ export default function Footer() {
   const links = [
     { label: 'Bói bài tarot', href: '/reading' },
     { label: 'Bài tarot', href: '/library' },
+    { label: 'Star Chart', href: '/star-chart' },
     { label: 'Quote of the Day', href: '/quotes' },
     { label: 'API Docs', href: '/api-docs' },
     { label: 'About', href: '/about' },
