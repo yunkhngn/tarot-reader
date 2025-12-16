@@ -133,6 +133,26 @@ export default function ChartForm({ onGenerate, isLoading }) {
     return Object.keys(newErrors).length === 0;
   };
   
+  // Clear location error when province is selected
+  useEffect(() => {
+    if (selectedProvince && errors.location) {
+      setErrors(prev => {
+        const { location, ...rest } = prev;
+        return rest;
+      });
+    }
+  }, [selectedProvince]);
+  
+  // Clear name error when name is valid
+  useEffect(() => {
+    if (name.trim().length >= 2 && errors.name) {
+      setErrors(prev => {
+        const { name: _, ...rest } = prev;
+        return rest;
+      });
+    }
+  }, [name]);
+  
   // Get location display text
   const locationText = useMemo(() => {
     const parts = [];
@@ -359,50 +379,42 @@ export default function ChartForm({ onGenerate, isLoading }) {
         <label className="block text-white/70 text-sm uppercase tracking-wider mb-2">
           Nơi sinh <span className="text-red-400">*</span>
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {/* Province */}
-          <Select
-            placeholder={loadingProvinces ? "Đang tải..." : "Chọn Tỉnh/Thành phố"}
-            selectedKeys={selectedProvince ? [selectedProvince] : []}
-            onSelectionChange={(keys) => {
-              setSelectedProvince(Array.from(keys)[0] || '');
-              setTouched(prev => ({ ...prev, location: true }));
-            }}
-            isDisabled={loadingProvinces}
-            classNames={touched.location && errors.location ? errorSelectClasses : selectClasses}
-          >
-            {provinces.map((p) => (
-              <SelectItem key={String(p.code)} textValue={p.name}>
-                {p.name}
-              </SelectItem>
-            ))}
-          </Select>
-          
-          {/* District */}
-          <Select
-            placeholder={loadingDistricts ? "Đang tải..." : "Chọn Quận/Huyện"}
-            selectedKeys={selectedDistrict ? [selectedDistrict] : []}
-            onSelectionChange={(keys) => setSelectedDistrict(Array.from(keys)[0] || '')}
-            isDisabled={!selectedProvince || loadingDistricts || districts.length === 0}
-            classNames={selectClasses}
-          >
-            {districts.map((d) => (
-              <SelectItem key={String(d.code)} textValue={d.name}>
-                {d.name}
-              </SelectItem>
-            ))}
-          </Select>
-        </div>
+        <Select
+          placeholder={loadingProvinces ? "Đang tải..." : "Chọn Tỉnh/Thành phố"}
+          selectedKeys={selectedProvince ? [selectedProvince] : []}
+          onSelectionChange={(keys) => {
+            const provinceCode = Array.from(keys)[0] || '';
+            setSelectedProvince(provinceCode);
+            setTouched(prev => ({ ...prev, location: true }));
+            
+            // Set coordinates from province
+            if (provinceCode) {
+              const coords = VIETNAM_PROVINCES[parseInt(provinceCode)];
+              if (coords) {
+                setLatitude(coords.lat);
+                setLongitude(coords.lon);
+              }
+            }
+          }}
+          isDisabled={loadingProvinces}
+          classNames={touched.location && errors.location ? errorSelectClasses : selectClasses}
+        >
+          {provinces.map((p) => (
+            <SelectItem key={String(p.code)} textValue={p.name}>
+              {p.name}
+            </SelectItem>
+          ))}
+        </Select>
         
         {/* Error message */}
         {touched.location && errors.location && (
           <p className="text-red-400 text-xs mt-2">{errors.location}</p>
         )}
         
-        {/* Location preview */}
+        {/* Location preview with coordinates */}
         {selectedProvince && !errors.location && (
           <p className="text-[#D4AF37] text-sm mt-2">
-            {locationText}
+            📍 {locationText} ({latitude.toFixed(2)}°N, {longitude.toFixed(2)}°E)
           </p>
         )}
       </div>

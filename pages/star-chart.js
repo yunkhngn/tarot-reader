@@ -8,7 +8,7 @@ import { Button } from '@heroui/react';
 import AppNavbar from '../components/Navbar';
 import Metadata from '../components/Metadata';
 import Footer from '../components/Footer';
-import { StarChart, ChartForm, ChartInfo, ChartExplanation } from '../components/StarChart';
+import { StarChart, ChartForm, ChartInfo, ChartExplanation, ChartAnalysis } from '../components/StarChart';
 import { calculateChart } from '../utils/astronomy';
 
 export default function StarChartPage() {
@@ -175,6 +175,9 @@ export default function StarChartPage() {
                 <div className="mt-12">
                   <ChartInfo chartData={chartData} />
                 </div>
+                
+                {/* Personality & Career Analysis */}
+                <ChartAnalysis chartData={chartData} />
               </>
             ) : (
               <div className="bg-[#111010] border-2 border-dashed border-white/20 rounded-lg p-8 sm:p-12 w-full flex flex-col items-center justify-center min-h-[200px]">
