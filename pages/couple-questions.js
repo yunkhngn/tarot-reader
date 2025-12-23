@@ -90,8 +90,7 @@ const CardStack = ({ question, index, onSwipe }) => {
   return (
     <motion.div
       style={{
-        width: '300px',
-        height: '450px',
+        // width and height removed, handled by className
         position: 'absolute',
         x: index === 0 ? x : 0,
         rotate: index === 0 ? rotate : 0,
@@ -107,12 +106,12 @@ const CardStack = ({ question, index, onSwipe }) => {
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
       whileTap={index === 0 ? { cursor: 'grabbing', scale: 1.02 } : {}}
-      className="bg-[#111010] border border-[#d4a052] rounded-[24px] flex items-center justify-center p-8 text-center"
+      className="absolute w-full h-full bg-[#111010] border border-[#d4a052] rounded-[24px] flex items-center justify-center p-6 sm:p-8 text-center shadow-2xl"
     >
-      <div className="absolute top-4 left-4 text-[#d4a052] text-xl opacity-80">✦</div>
-      <div className="absolute top-4 right-4 text-[#d4a052] text-xl opacity-80">✦</div>
-      <div className="absolute bottom-4 left-4 text-[#d4a052] text-xl opacity-80">✦</div>
-      <div className="absolute bottom-4 right-4 text-[#d4a052] text-xl opacity-80">✦</div>
+      <div className="absolute top-3 left-3 sm:top-4 sm:left-4 text-[#d4a052] text-lg sm:text-xl opacity-80">✦</div>
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 text-[#d4a052] text-lg sm:text-xl opacity-80">✦</div>
+      <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 text-[#d4a052] text-lg sm:text-xl opacity-80">✦</div>
+      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-[#d4a052] text-lg sm:text-xl opacity-80">✦</div>
       
       {/* Texture overlay */}
       <div 
@@ -124,20 +123,20 @@ const CardStack = ({ question, index, onSwipe }) => {
       />
       
       {/* Decorative border inset */}
-      <div className="absolute inset-3 border border-[#d4a052] border-opacity-30 rounded-[18px] pointer-events-none"></div>
+      <div className="absolute inset-2 sm:inset-3 border border-[#d4a052] border-opacity-30 rounded-[18px] pointer-events-none"></div>
 
-      <div className="relative z-10 flex flex-col items-center justify-between h-full py-8">
-        <div className="mb-4 opacity-50">
-             <span className="text-[#d4a052] text-2xl">☾</span>
+      <div className="relative z-10 flex flex-col items-center justify-between h-full py-6 sm:py-8">
+        <div className="mb-2 sm:mb-4 opacity-50">
+             <span className="text-[#d4a052] text-xl sm:text-2xl">☾</span>
         </div>
         
-        <p className="font-playfair text-[#f5f0e5] text-xl md:text-2xl font-bold leading-relaxed px-2 drop-shadow-lg">
+        <p className="font-playfair text-[#f5f0e5] text-lg sm:text-xl md:text-2xl font-bold leading-relaxed px-1 sm:px-2 drop-shadow-lg select-none">
           {question}
         </p>
         
-        <div className="mt-6 flex flex-col items-center gap-2">
-            <div className="w-12 h-[1px] bg-[#c08b45] opacity-50"></div>
-            <p className="text-[#c08b45] text-[10px] uppercase tracking-[0.3em] font-mulish font-semibold">
+        <div className="mt-4 sm:mt-6 flex flex-col items-center gap-2">
+            <div className="w-8 sm:w-12 h-[1px] bg-[#c08b45] opacity-50"></div>
+            <p className="text-[#c08b45] text-[9px] sm:text-[10px] uppercase tracking-[0.3em] font-mulish font-semibold">
                 Deep Talk
             </p>
         </div>
@@ -179,38 +178,40 @@ export default function CoupleQuestions() {
         description="Những câu hỏi sâu sắc giúp các cặp đôi hiểu nhau hơn."
         image="/tarot.jpeg"
       />
-      <div className="min-h-screen bg-[#0b0a0a] flex flex-col font-sans relative">
+      <div className="min-h-screen bg-[#0b0a0a] flex flex-col font-sans relative overflow-x-hidden">
         {/* Floating Background Gradients */}
-        <motion.div 
-          animate={{ 
-            x: [0, 100, 0], 
-            y: [0, -50, 0], 
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3] 
-          }}
-          transition={{ 
-            duration: 15, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }}
-          className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(212,160,82,0.15)_0%,rgba(0,0,0,0)_70%)] rounded-full blur-[80px] pointer-events-none z-0"
-        />
-        
-        <motion.div 
-          animate={{ 
-            x: [0, -80, 0], 
-            y: [0, 60, 0],
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2] 
-          }}
-          transition={{ 
-            duration: 20, 
-            repeat: Infinity, 
-            ease: "easeInOut",
-            delay: 2
-          }}
-          className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(192,139,69,0.1)_0%,rgba(0,0,0,0)_70%)] rounded-full blur-[80px] pointer-events-none z-0"
-        />
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <motion.div 
+            animate={{ 
+              x: [0, 100, 0], 
+              y: [0, -50, 0], 
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3] 
+            }}
+            transition={{ 
+              duration: 15, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
+            }}
+            className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(212,160,82,0.15)_0%,rgba(0,0,0,0)_70%)] rounded-full blur-[80px]"
+          />
+          
+          <motion.div 
+            animate={{ 
+              x: [0, -80, 0], 
+              y: [0, 60, 0],
+              scale: [1, 1.3, 1],
+              opacity: [0.2, 0.4, 0.2] 
+            }}
+            transition={{ 
+              duration: 20, 
+              repeat: Infinity, 
+              ease: "easeInOut",
+              delay: 2
+            }}
+            className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(192,139,69,0.1)_0%,rgba(0,0,0,0)_70%)] rounded-full blur-[80px]"
+          />
+        </div>
 
         <div className="relative z-10 w-full flex flex-col min-h-screen">
           <AppNavbar />
@@ -225,7 +226,7 @@ export default function CoupleQuestions() {
                </p>
             </div>
 
-            <div className="relative w-[300px] h-[450px] flex items-center justify-center">
+            <div className="relative w-[85vw] h-[55vh] max-w-[300px] max-h-[450px] flex items-center justify-center">
               <AnimatePresence custom={direction}>
                {visibleQuestions.slice().reverse().map((item, index) => {
                    const stackIndex = visibleQuestions.length - 1 - index;
